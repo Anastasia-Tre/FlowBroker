@@ -1,6 +1,6 @@
-﻿using FlowBroker.Core.Client;
-using FlowBroker.Core.Flow;
-using FlowBroker.Core.FlowPacket;
+﻿using FlowBroker.Core.Clients;
+using FlowBroker.Core.FlowPackets;
+using FlowBroker.Core.Flows;
 using Microsoft.Extensions.Logging;
 
 namespace FlowBroker.Core.Broker;

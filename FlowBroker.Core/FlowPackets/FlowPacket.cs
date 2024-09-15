@@ -1,7 +1,7 @@
-﻿using FlowBroker.Core.Persistence;
-using System.Buffers;
+﻿using System.Buffers;
+using FlowBroker.Core.Persistence;
 
-namespace FlowBroker.Core.FlowPacket;
+namespace FlowBroker.Core.FlowPackets;
 
 public struct FlowPacket
 {

@@ -1,6 +1,6 @@
 ﻿using FlowBroker.Core.Persistence;
 
-namespace FlowBroker.Core.Client;
+namespace FlowBroker.Core.Clients;
 
 public interface IClient : IDisposable
 {

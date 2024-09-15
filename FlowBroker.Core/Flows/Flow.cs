@@ -1,7 +1,8 @@
-﻿using FlowBroker.Core.Client;
+﻿using FlowBroker.Core.Clients;
+using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Persistence;
 
-namespace FlowBroker.Core.Flow;
+namespace FlowBroker.Core.Flows;
 
 public interface IFlow : IDisposable
 {
@@ -12,7 +13,7 @@ public interface IFlow : IDisposable
 
     void StartProcessingFlowPackets();
     Task ReadNextFlowPacket();
-    void OnFlowPacket(FlowPacket.FlowPacket packet);
+    void OnFlowPacket(FlowPacket packet);
 
     void ClientSubscribed(IClient client);
     void ClientUnsubscribed(IClient client);
@@ -39,7 +40,7 @@ public class Flow : IFlow
         throw new NotImplementedException();
     }
 
-    public void OnFlowPacket(FlowPacket.FlowPacket packet)
+    public void OnFlowPacket(FlowPacket packet)
     {
         throw new NotImplementedException();
     }
