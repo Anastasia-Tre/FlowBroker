@@ -15,11 +15,10 @@ public interface IBroker : IDisposable
 
 public class Broker : IBroker
 {
-    public IServiceProvider ServiceProvider { get; }
-
-    private readonly ILogger<Broker> _logger;
     private readonly IClientRepository _clientRepository;
     private readonly IFlowRepository _flowRepository;
+
+    private readonly ILogger<Broker> _logger;
     private readonly IFlowPacketRepository _packetRepository;
 
     public Broker(IServiceProvider serviceProvider, ILogger<Broker> logger,
@@ -32,6 +31,8 @@ public class Broker : IBroker
         _packetRepository = packetRepository;
         ServiceProvider = serviceProvider;
     }
+
+    public IServiceProvider ServiceProvider { get; }
 
     public void Start()
     {

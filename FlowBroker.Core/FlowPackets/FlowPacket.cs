@@ -37,6 +37,7 @@ public class FlowPacket
 
 public interface IFlowPacketRepository : IDataRepository<Guid, FlowPacket>;
 
-public class FlowPacketRepository : DataRepository<Guid, FlowPacket>, IFlowPacketRepository
+public class FlowPacketRepository : DataRepository<Guid, FlowPacket>,
+    IFlowPacketRepository
 {
 }

@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlowBroker.Core.Tcp;
 
@@ -13,8 +8,11 @@ public interface ISocket : IDisposable
     bool Connected { get; }
     void Disconnect();
 
-    ValueTask<int> SendAsync(Memory<byte> data, CancellationToken cancellationToken);
-    ValueTask<int> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken);
+    ValueTask<int> SendAsync(Memory<byte> data,
+        CancellationToken cancellationToken);
+
+    ValueTask<int> ReceiveAsync(Memory<byte> buffer,
+        CancellationToken cancellationToken);
 }
 
 public sealed class TcpSocket : ISocket
@@ -36,10 +34,12 @@ public sealed class TcpSocket : ISocket
         {
             _socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
-        } catch (SocketException)
+        }
+        catch (SocketException)
         {
             // ignore SocketException
-        } catch (ObjectDisposedException)
+        }
+        catch (ObjectDisposedException)
         {
             // ignore ObjectDisposedException
         }
@@ -48,36 +48,44 @@ public sealed class TcpSocket : ISocket
         Dispose();
     }
 
-    public async ValueTask<int> SendAsync(Memory<byte> data, CancellationToken cancellationToken)
+    public async ValueTask<int> SendAsync(Memory<byte> data,
+        CancellationToken cancellationToken)
     {
         if (_disposed)
             return 0;
 
         try
         {
-            return await _socket.SendAsync(data, SocketFlags.None, cancellationToken);
-        } catch (TaskCanceledException)
+            return await _socket.SendAsync(data, SocketFlags.None,
+                cancellationToken);
+        }
+        catch (TaskCanceledException)
         {
             return 0;
-        } catch
+        }
+        catch
         {
             Disconnect();
             return 0;
         }
     }
 
-    public async ValueTask<int> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+    public async ValueTask<int> ReceiveAsync(Memory<byte> buffer,
+        CancellationToken cancellationToken)
     {
         if (_disposed)
             return 0;
 
         try
         {
-            return await _socket.ReceiveAsync(buffer, SocketFlags.None, cancellationToken);
-        } catch (TaskCanceledException)
+            return await _socket.ReceiveAsync(buffer, SocketFlags.None,
+                cancellationToken);
+        }
+        catch (TaskCanceledException)
         {
             return 0;
-        } catch
+        }
+        catch
         {
             Disconnect();
             return 0;
@@ -91,7 +99,8 @@ public sealed class TcpSocket : ISocket
             {
                 _socket.Dispose();
                 _disposed = true;
-            } catch (ObjectDisposedException)
+            }
+            catch (ObjectDisposedException)
             {
                 // ignore ObjectDisposedException
             }
@@ -99,7 +108,8 @@ public sealed class TcpSocket : ISocket
 
     public static TcpSocket NewFromEndPoint(EndPoint endPoint)
     {
-        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream,
+            ProtocolType.Tcp);
         socket.Connect(endPoint);
         return new TcpSocket(socket);
     }

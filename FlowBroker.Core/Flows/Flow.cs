@@ -25,6 +25,7 @@ public class Flow : IFlow
 {
     public string Name { get; }
     public string FlowPath { get; }
+
     public void Setup(string name, string route)
     {
         throw new NotImplementedException();
@@ -71,4 +72,3 @@ public interface IFlowRepository : IDataRepository<Guid, IFlow>;
 public class FlowRepository : DataRepository<Guid, IFlow>, IFlowRepository
 {
 }
-

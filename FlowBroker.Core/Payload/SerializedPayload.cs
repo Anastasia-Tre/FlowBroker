@@ -1,10 +1,5 @@
-﻿using FlowBroker.Core.Utils.Pooling;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Buffers;
+using FlowBroker.Core.Utils.Pooling;
 
 namespace FlowBroker.Core.Payload;
 
@@ -17,7 +12,8 @@ public class SerializedPayload : IPooledObject
 
     public Memory<byte> Data => _buffer.AsMemory(0, _size);
 
-    public Memory<byte> DataWithoutSize => Data[BinaryProtocolConfiguration.PayloadHeaderSize..];
+    public Memory<byte> DataWithoutSize =>
+        Data[BinaryProtocolConfiguration.PayloadHeaderSize..];
 
     public Guid PoolId { get; set; }
 

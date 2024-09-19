@@ -1,11 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace FlowBroker.Core.Tcp;
 
@@ -41,14 +36,16 @@ public sealed class TcpListener : IListener
         ThrowIfDisposed();
 
         if (_isAccepting)
-            throw new InvalidOperationException("Server is already accepting connection");
+            throw new InvalidOperationException(
+                "Server is already accepting connection");
 
         _isAccepting = true;
 
         _socketAsyncEventArgs = new SocketAsyncEventArgs();
         _socketAsyncEventArgs.Completed += OnAcceptCompleted;
 
-        _socket = new Socket(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        _socket = new Socket(_endPoint.AddressFamily, SocketType.Stream,
+            ProtocolType.Tcp);
         _socket.Bind(_endPoint);
         _socket.Listen(1024);
 
@@ -90,13 +87,16 @@ public sealed class TcpListener : IListener
                 OnAcceptCompleted(null, _socketAsyncEventArgs);
                 _socketAsyncEventArgs.AcceptSocket = null;
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
-            _logger.LogError($"Server encountered an exception while trying to accept connection, exception: {e}");
+            _logger.LogError(
+                $"Server encountered an exception while trying to accept connection, exception: {e}");
         }
     }
 
-    private void OnAcceptCompleted(object _, SocketAsyncEventArgs socketAsyncEventArgs)
+    private void OnAcceptCompleted(object _,
+        SocketAsyncEventArgs socketAsyncEventArgs)
     {
         switch (socketAsyncEventArgs.SocketError)
         {
@@ -113,11 +113,13 @@ public sealed class TcpListener : IListener
 
     private void OnAcceptSuccess(Socket socket)
     {
-        _logger.LogInformation($"Accepted new socket connection from {socket.RemoteEndPoint}");
+        _logger.LogInformation(
+            $"Accepted new socket connection from {socket.RemoteEndPoint}");
 
         var tcpSocket = new TcpSocket(socket);
 
-        var socketAcceptedEventArgs = new SocketAcceptedEventArgs { Socket = tcpSocket };
+        var socketAcceptedEventArgs = new SocketAcceptedEventArgs
+            { Socket = tcpSocket };
 
         OnSocketAccepted?.Invoke(this, socketAcceptedEventArgs);
     }
@@ -134,7 +136,7 @@ public sealed class TcpListener : IListener
     }
 }
 
-public class SocketAcceptedEventArgs : System.EventArgs
+public class SocketAcceptedEventArgs : EventArgs
 {
     public ISocket Socket { get; set; }
 }

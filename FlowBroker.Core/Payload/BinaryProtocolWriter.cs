@@ -1,11 +1,7 @@
-﻿using FlowBroker.Core.Utils.Pooling;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Buffers;
 using System.Text;
-using System.Threading.Tasks;
 using FlowBroker.Core.FlowPackets;
+using FlowBroker.Core.Utils.Pooling;
 
 namespace FlowBroker.Core.Payload;
 
@@ -86,13 +82,18 @@ public class BinaryProtocolWriter : IDisposable, IPooledObject
 
     public BinaryProtocolWriter WriteMemory(Memory<byte> m)
     {
-        MakeSureBufferSizeHasRoomForSize(m.Length + BinaryProtocolConfiguration.SizeForInt);
+        MakeSureBufferSizeHasRoomForSize(m.Length +
+                                         BinaryProtocolConfiguration
+                                             .SizeForInt);
 
-        BitConverter.TryWriteBytes(_buffer.AsSpan(_currentBufferOffset), m.Length);
+        BitConverter.TryWriteBytes(_buffer.AsSpan(_currentBufferOffset),
+            m.Length);
 
-        m.CopyTo(_buffer.AsMemory(_currentBufferOffset + BinaryProtocolConfiguration.SizeForInt));
+        m.CopyTo(_buffer.AsMemory(_currentBufferOffset +
+                                  BinaryProtocolConfiguration.SizeForInt));
 
-        _currentBufferOffset += m.Length + BinaryProtocolConfiguration.SizeForInt;
+        _currentBufferOffset +=
+            m.Length + BinaryProtocolConfiguration.SizeForInt;
 
         WriteNewLine();
 
@@ -110,7 +111,8 @@ public class BinaryProtocolWriter : IDisposable, IPooledObject
             serializedPayload.FillFrom(_buffer, _currentBufferOffset, _id);
 
             return serializedPayload;
-        } finally
+        }
+        finally
         {
             Refresh();
         }
@@ -118,7 +120,8 @@ public class BinaryProtocolWriter : IDisposable, IPooledObject
 
     private void WriteSizeOfPayloadToBufferHeader()
     {
-        var sizeOfPayload = _currentBufferOffset - BinaryProtocolConfiguration.PayloadHeaderSize;
+        var sizeOfPayload = _currentBufferOffset -
+                            BinaryProtocolConfiguration.PayloadHeaderSize;
         BitConverter.TryWriteBytes(_buffer, sizeOfPayload);
     }
 
@@ -140,7 +143,8 @@ public class BinaryProtocolWriter : IDisposable, IPooledObject
 
         if (exceedingSize > 0)
         {
-            var newBuffer = ArrayPool<byte>.Shared.Rent(_buffer.Length + exceedingSize);
+            var newBuffer =
+                ArrayPool<byte>.Shared.Rent(_buffer.Length + exceedingSize);
             _buffer.CopyTo(newBuffer.AsMemory());
             ArrayPool<byte>.Shared.Return(_buffer, true);
             _buffer = newBuffer;

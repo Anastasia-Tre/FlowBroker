@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace FlowBroker.Core.Utils.Pooling;
 
@@ -14,7 +10,8 @@ public class StringPool
 
     public static StringPool Shared
     {
-        get {
+        get
+        {
             if (_shared == null)
                 _shared = new StringPool();
             return _shared;

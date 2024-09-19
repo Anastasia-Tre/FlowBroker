@@ -22,7 +22,8 @@ public class BrokerBuilder
 
         _serviceCollection.AddSingleton<IClientRepository, ClientRepository>();
         _serviceCollection.AddSingleton<IFlowRepository, FlowRepository>();
-        _serviceCollection.AddSingleton<IFlowPacketRepository, FlowPacketRepository>();
+        _serviceCollection
+            .AddSingleton<IFlowPacketRepository, FlowPacketRepository>();
 
         _serviceCollection.AddSingleton<IListener, TcpListener>();
 

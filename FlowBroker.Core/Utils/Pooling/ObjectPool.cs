@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FlowBroker.Core.Utils.Pooling;
+﻿namespace FlowBroker.Core.Utils.Pooling;
 
 public interface IPooledObject
 {
@@ -37,9 +30,7 @@ public class ObjectPool : IObjectPool
         lock (_objectTypeDict)
         {
             if (!_objectTypeDict.ContainsKey(typeKey))
-            {
                 _objectTypeDict[typeKey] = new Queue<object>();
-            }
 
             var bag = _objectTypeDict[typeKey];
 

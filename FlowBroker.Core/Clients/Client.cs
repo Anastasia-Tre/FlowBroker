@@ -15,7 +15,9 @@ public interface IClient : IDisposable
     void StartReceiveProcess();
     void StartSendProcess();
     Task SendNextFlowPacketInQueue();
-    Task<bool> SendAsync(Memory<byte> payload, CancellationToken cancellationToken);
+
+    Task<bool> SendAsync(Memory<byte> payload,
+        CancellationToken cancellationToken);
 
     void OnPayloadAckReceived(Guid payloadId);
     void OnPayloadNackReceived(Guid payloadId);
@@ -29,6 +31,7 @@ public class Client : IClient
     public bool IsClosed { get; }
     public event EventHandler<EventArgs>? OnDisconnected;
     public event EventHandler<EventArgs>? OnDataReceived;
+
     public void Setup()
     {
         throw new NotImplementedException();
@@ -49,7 +52,8 @@ public class Client : IClient
         throw new NotImplementedException();
     }
 
-    public Task<bool> SendAsync(Memory<byte> payload, CancellationToken cancellationToken)
+    public Task<bool> SendAsync(Memory<byte> payload,
+        CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
@@ -74,7 +78,6 @@ public class Client : IClient
         throw new NotImplementedException();
     }
 }
-
 
 public interface IClientRepository : IDataRepository<Guid, IClient>;
 

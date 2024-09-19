@@ -9,17 +9,21 @@ public interface IDataRepository<in TKey, TValue> where TKey : notnull
     IEnumerable<TValue> GetAll();
 }
 
-public abstract class DataRepository<TKey, TValue> : IDataRepository<TKey, TValue> where TKey : notnull
+public abstract class
+    DataRepository<TKey, TValue> : IDataRepository<TKey, TValue>
+    where TKey : notnull
 {
-    protected readonly Dictionary<TKey, TValue> Data = new Dictionary<TKey, TValue>();
+    protected readonly Dictionary<TKey, TValue> Data = new();
 
     public virtual void Setup()
-    { }
+    {
+    }
 
     public virtual void Add(TKey key, TValue value)
     {
         if (!Data.TryAdd(key, value))
-            throw new ArgumentException($"An item with the key {key} already exists.");
+            throw new ArgumentException(
+                $"An item with the key {key} already exists.");
     }
 
     public virtual bool Remove(TKey key)
@@ -37,4 +41,3 @@ public abstract class DataRepository<TKey, TValue> : IDataRepository<TKey, TValu
         return Data.Values;
     }
 }
-

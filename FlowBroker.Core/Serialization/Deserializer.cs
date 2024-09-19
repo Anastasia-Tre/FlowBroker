@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FlowBroker.Core.FlowPackets;
+﻿using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Utils.Pooling;
 
@@ -20,7 +15,9 @@ public class Deserializer : IDeserializer
 {
     public FlowPacketType ParseFlowPacketType(Memory<byte> b)
     {
-        var typeSlice = BitConverter.ToInt32(b.Span[..BinaryProtocolConfiguration.SizeForInt]);
+        var typeSlice =
+            BitConverter.ToInt32(
+                b.Span[..BinaryProtocolConfiguration.SizeForInt]);
         return (FlowPacketType)typeSlice;
     }
 
@@ -44,7 +41,8 @@ public class Deserializer : IDeserializer
                 Data = dataSize.OriginalData.AsMemory(0, dataSize.Size),
                 OriginalFlowPacketData = dataSize.OriginalData
             };
-        } finally
+        }
+        finally
         {
             ObjectPool.Shared.Return(binaryReader);
         }

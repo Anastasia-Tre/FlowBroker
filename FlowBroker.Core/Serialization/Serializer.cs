@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FlowBroker.Core.FlowPackets;
+﻿using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Utils.Pooling;
 
@@ -29,7 +24,8 @@ public class Serializer : ISerializer
                 .WriteStr(packet.FlowName)
                 .WriteMemory(packet.Data)
                 .ToSerializedPayload();
-        } finally
+        }
+        finally
         {
             ObjectPool.Shared.Return(binaryWriter);
         }

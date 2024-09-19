@@ -1,10 +1,5 @@
-﻿using FlowBroker.Core.Utils.Pooling;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Buffers;
+using FlowBroker.Core.Utils.Pooling;
 
 namespace FlowBroker.Core.Payload;
 
@@ -18,7 +13,8 @@ public class BinaryProtocolReader : IPooledObject
     public void Setup(Memory<byte> data)
     {
         // skip the type 
-        _currentOffset = BinaryProtocolConfiguration.SizeForInt + BinaryProtocolConfiguration.SizeForNewLine;
+        _currentOffset = BinaryProtocolConfiguration.SizeForInt +
+                         BinaryProtocolConfiguration.SizeForNewLine;
         _receivedData = data;
     }
 
@@ -26,10 +22,13 @@ public class BinaryProtocolReader : IPooledObject
     {
         try
         {
-            var data = _receivedData.Span.Slice(_currentOffset, BinaryProtocolConfiguration.SizeForGuid);
-            _currentOffset += BinaryProtocolConfiguration.SizeForGuid + BinaryProtocolConfiguration.SizeForNewLine;
+            var data = _receivedData.Span.Slice(_currentOffset,
+                BinaryProtocolConfiguration.SizeForGuid);
+            _currentOffset += BinaryProtocolConfiguration.SizeForGuid +
+                              BinaryProtocolConfiguration.SizeForNewLine;
             return new Guid(data);
-        } catch (ArgumentOutOfRangeException)
+        }
+        catch (ArgumentOutOfRangeException)
         {
             throw new ArgumentOutOfRangeException(
                 $"Cannot read Guid, current is {_currentOffset}, needed is {BinaryProtocolConfiguration.SizeForGuid}, available is {_receivedData.Length - _currentOffset}");
@@ -43,8 +42,10 @@ public class BinaryProtocolReader : IPooledObject
             var data = _receivedData.Span[_currentOffset..];
             var indexOfDelimiter = data.IndexOf((byte)'\n');
             _currentOffset += indexOfDelimiter + 1;
-            return StringPool.Shared.GetStringForBytes(data[..indexOfDelimiter]);
-        } catch (ArgumentOutOfRangeException)
+            return StringPool.Shared.GetStringForBytes(
+                data[..indexOfDelimiter]);
+        }
+        catch (ArgumentOutOfRangeException)
         {
             throw new ArgumentOutOfRangeException(
                 $"Cannot read string, current is {_currentOffset}, available is {_receivedData.Length - _currentOffset}");
@@ -53,8 +54,10 @@ public class BinaryProtocolReader : IPooledObject
 
     public int ReadNextInt()
     {
-        var data = _receivedData.Span.Slice(_currentOffset, BinaryProtocolConfiguration.SizeForInt);
-        _currentOffset += BinaryProtocolConfiguration.SizeForInt + BinaryProtocolConfiguration.SizeForNewLine;
+        var data = _receivedData.Span.Slice(_currentOffset,
+            BinaryProtocolConfiguration.SizeForInt);
+        _currentOffset += BinaryProtocolConfiguration.SizeForInt +
+                          BinaryProtocolConfiguration.SizeForNewLine;
         return BitConverter.ToInt32(data);
     }
 
@@ -63,7 +66,8 @@ public class BinaryProtocolReader : IPooledObject
         try
         {
             var spanForSizeOfBinaryData =
-                _receivedData.Span.Slice(_currentOffset, BinaryProtocolConfiguration.SizeForInt);
+                _receivedData.Span.Slice(_currentOffset,
+                    BinaryProtocolConfiguration.SizeForInt);
 
             var sizeToRead = BitConverter.ToInt32(spanForSizeOfBinaryData);
 
@@ -78,7 +82,8 @@ public class BinaryProtocolReader : IPooledObject
             data.CopyTo(arr);
 
             return (arr, sizeToRead);
-        } catch (Exception)
+        }
+        catch (Exception)
         {
             throw new ArgumentOutOfRangeException(
                 $"Cannot read bytes, current is {_currentOffset}, available is {_receivedData.Length - _currentOffset}");
