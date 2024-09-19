@@ -1,4 +1,4 @@
-﻿namespace FlowBroker.Core.Persistence;
+﻿namespace FlowBroker.Core.Utils.Persistence;
 
 public interface IDataRepository<in TKey, TValue> where TKey : notnull
 {
