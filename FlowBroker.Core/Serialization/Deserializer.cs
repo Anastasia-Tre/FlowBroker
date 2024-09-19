@@ -29,14 +29,14 @@ public class Deserializer : IDeserializer
         try
         {
             var packetId = binaryReader.ReadNextGuid();
-            var route = binaryReader.ReadNextString();
+            var path = binaryReader.ReadNextString();
             var queueName = binaryReader.ReadNextString();
             var dataSize = binaryReader.ReadNextBytes();
 
             return new FlowPacket
             {
                 Id = packetId,
-                FlowPath = route,
+                FlowPath = path,
                 FlowName = queueName,
                 Data = dataSize.OriginalData.AsMemory(0, dataSize.Size),
                 OriginalFlowPacketData = dataSize.OriginalData

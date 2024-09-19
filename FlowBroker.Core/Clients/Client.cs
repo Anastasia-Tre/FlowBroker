@@ -1,4 +1,5 @@
-﻿using FlowBroker.Core.Utils.Persistence;
+﻿using FlowBroker.Core.Payload;
+using FlowBroker.Core.Utils.Persistence;
 
 namespace FlowBroker.Core.Clients;
 
@@ -18,6 +19,8 @@ public interface IClient : IDisposable
 
     Task<bool> SendAsync(Memory<byte> payload,
         CancellationToken cancellationToken);
+
+    void EnqueueFireAndForget(SerializedPayload serializedPayload);
 
     void OnPayloadAckReceived(Guid payloadId);
     void OnPayloadNackReceived(Guid payloadId);
@@ -54,6 +57,11 @@ public class Client : IClient
 
     public Task<bool> SendAsync(Memory<byte> payload,
         CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void EnqueueFireAndForget(SerializedPayload serializedPayload)
     {
         throw new NotImplementedException();
     }

@@ -9,7 +9,7 @@ public interface IFlow : IDisposable
     string Name { get; }
     string FlowPath { get; }
 
-    void Setup(string name, string route);
+    void Setup(string name, string path);
 
     void StartProcessingFlowPackets();
     Task ReadNextFlowPacket();
@@ -26,7 +26,7 @@ public class Flow : IFlow
     public string Name { get; }
     public string FlowPath { get; }
 
-    public void Setup(string name, string route)
+    public void Setup(string name, string path)
     {
         throw new NotImplementedException();
     }
@@ -65,10 +65,4 @@ public class Flow : IFlow
     {
         throw new NotImplementedException();
     }
-}
-
-public interface IFlowRepository : IDataRepository<Guid, IFlow>;
-
-public class FlowRepository : DataRepository<Guid, IFlow>, IFlowRepository
-{
 }

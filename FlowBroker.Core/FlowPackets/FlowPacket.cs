@@ -5,18 +5,18 @@ namespace FlowBroker.Core.FlowPackets;
 
 public enum FlowPacketType
 {
-    Message = 1,
+    FlowPacket = 1,
     Ok = 2,
     Error = 3,
     Ack = 4,
     Nack = 5,
-    TopicDeclare = 6,
-    TopicDelete = 7,
-    SubscribeTopic = 8,
-    UnsubscribeTopic = 9,
+    FlowDeclare = 6,
+    FlowDelete = 7,
+    SubscribeFlow = 8,
+    UnsubscribeFlow = 9,
     Ready = 10,
     Configure = 11,
-    TopicMessage = 12
+    FlowFlowPacket = 12
 }
 
 public class FlowPacket
@@ -27,7 +27,7 @@ public class FlowPacket
     public Memory<byte> Data { get; set; }
     public byte[] OriginalFlowPacketData { get; set; }
 
-    public FlowPacketType PacketType { get; set; } = FlowPacketType.Message;
+    public FlowPacketType PacketType { get; set; } = FlowPacketType.FlowPacket;
 
     public void Dispose()
     {

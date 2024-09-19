@@ -1,6 +1,7 @@
 ﻿using FlowBroker.Core.Clients;
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Flows;
+using FlowBroker.Core.Payload;
 using FlowBroker.Core.Serialization;
 using FlowBroker.Core.Tcp;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,8 @@ public class BrokerBuilder
 
         _serviceCollection.AddSingleton<ISerializer, Serializer>();
         _serviceCollection.AddSingleton<IDeserializer, Deserializer>();
+
+        _serviceCollection.AddSingleton<IPayloadProcessor, PayloadProcessor>();
     }
 
     public IBroker Build()
