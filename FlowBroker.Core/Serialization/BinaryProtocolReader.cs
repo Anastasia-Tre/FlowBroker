@@ -1,7 +1,8 @@
 ﻿using System.Buffers;
+using FlowBroker.Core.Payload;
 using FlowBroker.Core.Utils.Pooling;
 
-namespace FlowBroker.Core.Payload;
+namespace FlowBroker.Core.Serialization;
 
 public class BinaryProtocolReader : IPooledObject
 {

@@ -1,9 +1,10 @@
 ﻿using System.Buffers;
 using System.Text;
 using FlowBroker.Core.FlowPackets;
+using FlowBroker.Core.Payload;
 using FlowBroker.Core.Utils.Pooling;
 
-namespace FlowBroker.Core.Payload;
+namespace FlowBroker.Core.Serialization;
 
 public class BinaryProtocolWriter : IDisposable, IPooledObject
 {

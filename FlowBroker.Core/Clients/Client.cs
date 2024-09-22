@@ -1,5 +1,12 @@
-﻿using FlowBroker.Core.Payload;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
+using System.Net.Sockets;
+using System.Threading.Channels;
+using FlowBroker.Core.Payload;
+using FlowBroker.Core.Tcp;
 using FlowBroker.Core.Utils.Persistence;
+using FlowBroker.Core.Utils.Pooling;
+using Microsoft.Extensions.Logging;
 
 namespace FlowBroker.Core.Clients;
 
@@ -9,9 +16,9 @@ public interface IClient : IDisposable
     bool IsClosed { get; }
 
     event EventHandler<EventArgs> OnDisconnected;
-    event EventHandler<EventArgs> OnDataReceived;
+    event EventHandler<ClientSessionDataReceivedEventArgs> OnDataReceived;
 
-    void Setup();
+    void Setup(ISocket socket);
 
     void StartReceiveProcess();
     void StartSendProcess();
@@ -31,59 +38,213 @@ public interface IClient : IDisposable
 public class Client : IClient
 {
     public Guid Id { get; }
-    public bool IsClosed { get; }
+    public bool IsClosed { get; set; }
     public event EventHandler<EventArgs>? OnDisconnected;
-    public event EventHandler<EventArgs>? OnDataReceived;
+    public event EventHandler<ClientSessionDataReceivedEventArgs>? OnDataReceived;
 
-    public void Setup()
+    private readonly IBinaryDataProcessor _binaryDataProcessor;
+
+    private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly ILogger<Client> _logger;
+    private readonly Channel<SerializedPayload> _queue;
+    private readonly byte[] _receiveBuffer;
+    private readonly ConcurrentDictionary<Guid, AsyncPayloadTicket> _tickets;
+    private ISocket _socket;
+
+    public Client(ILogger<Client> logger, IBinaryDataProcessor binaryDataProcessor = null)
     {
-        throw new NotImplementedException();
+        _logger = logger;
+
+        Id = Guid.NewGuid();
+
+        _binaryDataProcessor = binaryDataProcessor ?? new BinaryDataProcessor();
+
+        _receiveBuffer = ArrayPool<byte>.Shared.Rent(BinaryProtocolConfiguration.ReceiveDataSize);
+
+        _tickets = new ConcurrentDictionary<Guid, AsyncPayloadTicket>();
+
+        _cancellationTokenSource = new CancellationTokenSource();
+
+        _queue = Channel.CreateUnbounded<SerializedPayload>();
+    }
+
+    public void Setup(ISocket socket)
+    {
+        if (!socket.Connected)
+            throw new InvalidOperationException("The provided tcp socket was not in connected state");
+
+        _socket = socket;
     }
 
     public void StartReceiveProcess()
     {
-        throw new NotImplementedException();
+        ThrowIfDisposed();
+
+        Task.Factory.StartNew(async () =>
+        {
+            while (!IsClosed) await ReceiveAsync();
+
+            OnReceivedDataDisposed();
+        }, TaskCreationOptions.LongRunning);
+    }
+
+    private void ProcessReceivedData()
+    {
+        try
+        {
+            _binaryDataProcessor.BeginLock();
+
+            while (_binaryDataProcessor.TryRead(out var binaryPayload))
+                try
+                {
+                    var dataReceivedEventArgs = new ClientSessionDataReceivedEventArgs
+                    {
+                        Data = binaryPayload.DataWithoutSize,
+                        Id = Id
+                    };
+
+                    OnDataReceived?.Invoke(this, dataReceivedEventArgs);
+                } finally
+                {
+                    binaryPayload.Dispose();
+                }
+        } finally
+        {
+            _binaryDataProcessor.EndLock();
+        }
+    }
+
+    private async ValueTask ReceiveAsync()
+    {
+        var receivedSize = await _socket.ReceiveAsync(_receiveBuffer, _cancellationTokenSource.Token);
+
+        if (receivedSize == 0)
+        {
+            Close();
+            return;
+        }
+
+        _binaryDataProcessor.Write(_receiveBuffer.AsMemory(0, receivedSize));
+
+        ProcessReceivedData();
     }
 
     public void StartSendProcess()
     {
-        throw new NotImplementedException();
+        ThrowIfDisposed();
+
+        Task.Factory.StartNew(async () =>
+        {
+            while (!IsClosed) await SendNextFlowPacketInQueue();
+        });
     }
 
-    public Task SendNextFlowPacketInQueue()
+    public async Task SendNextFlowPacketInQueue()
     {
-        throw new NotImplementedException();
+        var serializedPayload = await _queue.Reader.ReadAsync();
+
+        var result = await SendAsync(serializedPayload.Data, CancellationToken.None);
+
+        _logger.LogTrace($"Sending message: {serializedPayload.PayloadId} to client: {Id}");
+
+        if (!result) DisposeMessagePayloadAndSetStatus(serializedPayload.PayloadId, false);
+
+        ObjectPool.Shared.Return(serializedPayload);
     }
 
-    public Task<bool> SendAsync(Memory<byte> payload,
-        CancellationToken cancellationToken)
+    public async Task<bool> SendAsync(Memory<byte> payload, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var sendSize = await _socket.SendAsync(payload, cancellationToken);
+
+        if (sendSize == 0)
+        {
+            Close();
+            return false;
+        }
+
+        return true;
     }
 
     public void EnqueueFireAndForget(SerializedPayload serializedPayload)
     {
-        throw new NotImplementedException();
+        _queue.Writer.TryWrite(serializedPayload);
     }
 
     public void OnPayloadAckReceived(Guid payloadId)
     {
-        throw new NotImplementedException();
+        DisposeMessagePayloadAndSetStatus(payloadId, true);
     }
 
     public void OnPayloadNackReceived(Guid payloadId)
     {
-        throw new NotImplementedException();
+        DisposeMessagePayloadAndSetStatus(payloadId, false);
     }
 
     public void Close()
     {
-        throw new NotImplementedException();
+        lock (this)
+        {
+            if (IsClosed) return;
+
+            try
+            {
+                _logger.LogInformation($"Dispose was called on client: {Id}");
+
+                IsClosed = true;
+
+                _queue.Writer.TryComplete();
+
+                _cancellationTokenSource.Cancel();
+
+                if (_socket.Connected) _socket.Disconnect();
+
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    var disconnectedEventArgs = new ClientSessionDisconnectedEventArgs { Id = Id };
+                    OnDisconnected?.Invoke(this, disconnectedEventArgs);
+                    OnDisconnected = null;
+                });
+            } catch
+            {
+            }
+        }
     }
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        Close();
+    }
+
+    private void ThrowIfDisposed()
+    {
+        if (IsClosed)
+            throw new ObjectDisposedException("Session has been disposed previously");
+    }
+
+    private void OnReceivedDataDisposed()
+    {
+        _binaryDataProcessor.Dispose();
+        ArrayPool<byte>.Shared.Return(_receiveBuffer);
+        OnDataReceived = null;
+    }
+
+    private void DisposeMessagePayloadAndSetStatus(Guid payloadId, bool ack)
+    {
+        try
+        {
+            if (_tickets.Remove(payloadId, out var ticket))
+            {
+                var type = ack ? "Ack" : "nack";
+
+                _logger.LogTrace($"{type} received for message: {payloadId}");
+
+                ticket.SetStatus(ack);
+
+                ObjectPool.Shared.Return(ticket);
+            }
+        } catch
+        {
+        }
     }
 }
 
@@ -91,4 +252,15 @@ public interface IClientRepository : IDataRepository<Guid, IClient>;
 
 public class ClientRepository : DataRepository<Guid, IClient>, IClientRepository
 {
+}
+
+public sealed class ClientSessionDisconnectedEventArgs : System.EventArgs
+{
+    public Guid Id { get; set; }
+}
+
+public class ClientSessionDataReceivedEventArgs
+{
+    public Guid Id { get; set; }
+    public Memory<byte> Data { get; set; }
 }
