@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using FlowBroker.Core.Clients;
 
-namespace FlowBroker.Core.RouteMatching;
+namespace FlowBroker.Core.PathMatching;
 
 public interface IDispatcher
 {

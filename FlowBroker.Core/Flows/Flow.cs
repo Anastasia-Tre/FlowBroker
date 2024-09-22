@@ -2,7 +2,7 @@
 using FlowBroker.Core.Clients;
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
-using FlowBroker.Core.RouteMatching;
+using FlowBroker.Core.PathMatching;
 using FlowBroker.Core.Serialization;
 using FlowBroker.Core.Utils.WaitThrottling;
 using Microsoft.Extensions.Logging;
@@ -33,7 +33,7 @@ public class Flow : IFlow
     private readonly IFlowPacketRepository _flowPacketRepo;
     private readonly ILogger<Flow> _logger;
 
-    private readonly IRouteMatcher _pathMatcher;
+    private readonly IPathMatcher _pathMatcher;
 
     private readonly Channel<Guid> _queueChannel;
     private readonly ISerializer _serializer;
@@ -42,7 +42,7 @@ public class Flow : IFlow
     private bool _disposed;
 
     public Flow(IDispatcher dispatcher, IFlowPacketRepository flowPacketRepo,
-        IRouteMatcher pathMatcher,
+        IPathMatcher pathMatcher,
         ISerializer serializer, ILogger<Flow> logger)
     {
         _dispatcher = dispatcher;
@@ -100,11 +100,11 @@ public class Flow : IFlow
         _queueChannel.Writer.TryWrite(flowPacket.Id);
     }
 
-    public bool FlowPacketPathMatch(string flowPacketRoute)
+    public bool FlowPacketPathMatch(string flowPacketPath)
     {
         if (_disposed) return false;
 
-        return _pathMatcher.Match(flowPacketRoute, FlowPath);
+        return _pathMatcher.Match(flowPacketPath, FlowPath);
     }
 
     public void ClientSubscribed(IClient client)
