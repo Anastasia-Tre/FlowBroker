@@ -15,7 +15,7 @@ public interface IClient : IDisposable
     Guid Id { get; }
     bool IsClosed { get; }
 
-    event EventHandler<EventArgs> OnDisconnected;
+    event EventHandler<ClientSessionDisconnectedEventArgs> OnDisconnected;
     event EventHandler<ClientSessionDataReceivedEventArgs> OnDataReceived;
 
     void Setup(ISocket socket);
@@ -40,7 +40,7 @@ public class Client : IClient
 {
     public Guid Id { get; }
     public bool IsClosed { get; set; }
-    public event EventHandler<EventArgs>? OnDisconnected;
+    public event EventHandler<ClientSessionDisconnectedEventArgs>? OnDisconnected;
     public event EventHandler<ClientSessionDataReceivedEventArgs>? OnDataReceived;
 
     private readonly IBinaryDataProcessor _binaryDataProcessor;
@@ -174,7 +174,7 @@ public class Client : IClient
 
             if (queueWasSuccessful)
             {
-                _logger.LogTrace($"Enqueue message: {serializedPayload.PayloadId} in client: {Id}");
+                _logger.LogTrace($"Enqueue flowPacket: {serializedPayload.PayloadId} in client: {Id}");
 
                 var ticket = ObjectPool.Shared.Get<AsyncPayloadTicket>();
 

@@ -8,31 +8,31 @@ namespace FlowBroker.Core.RouteMatching;
 
 public interface IRouteMatcher
 {
-    bool Match(string messageRoute, string topicRoute);
+    bool Match(string flowPacketRoute, string flowRoute);
 }
 
 internal class RouteMatcher : IRouteMatcher
 {
-    public bool Match(string messageRoute, string topicRoute)
+    public bool Match(string flowPacketRoute, string flowRoute)
     {
-        if (messageRoute is null || topicRoute is null) return false;
+        if (flowPacketRoute is null || flowRoute is null) return false;
 
         const string wildCard = "*";
 
-        var messageRouteSegments = messageRoute.Split('/');
-        var queueRouteSegments = topicRoute.Split('/');
+        var flowPacketRouteSegments = flowPacketRoute.Split('/');
+        var queueRouteSegments = flowRoute.Split('/');
 
-        var minSegmentCount = Math.Min(messageRouteSegments.Length, queueRouteSegments.Length);
+        var minSegmentCount = Math.Min(flowPacketRouteSegments.Length, queueRouteSegments.Length);
 
         for (var i = 0; i < minSegmentCount; i++)
         {
-            var messageSegment = messageRouteSegments[i];
+            var flowPacketSegment = flowPacketRouteSegments[i];
             var queueSegment = queueRouteSegments[i];
 
-            if (messageSegment == wildCard || queueSegment == wildCard)
+            if (flowPacketSegment == wildCard || queueSegment == wildCard)
                 continue;
 
-            if (messageSegment == queueSegment)
+            if (flowPacketSegment == queueSegment)
                 continue;
 
             return false;

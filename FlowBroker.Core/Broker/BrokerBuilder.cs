@@ -2,6 +2,7 @@
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Flows;
 using FlowBroker.Core.Payload;
+using FlowBroker.Core.RouteMatching;
 using FlowBroker.Core.Serialization;
 using FlowBroker.Core.Tcp;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,8 @@ public class BrokerBuilder
         _serviceCollection.AddSingleton<IDeserializer, Deserializer>();
 
         _serviceCollection.AddSingleton<IPayloadProcessor, PayloadProcessor>();
+        _serviceCollection.AddSingleton<IRouteMatcher, RouteMatcher>();
+        _serviceCollection.AddTransient<IDispatcher, Dispatcher>();
     }
 
     public IBroker Build()
