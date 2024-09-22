@@ -27,6 +27,7 @@ public interface IClient : IDisposable
     Task<bool> SendAsync(Memory<byte> payload,
         CancellationToken cancellationToken);
 
+    AsyncPayloadTicket Enqueue(SerializedPayload serializedPayload);
     void EnqueueFireAndForget(SerializedPayload serializedPayload);
 
     void OnPayloadAckReceived(Guid payloadId);
@@ -145,9 +146,9 @@ public class Client : IClient
 
         var result = await SendAsync(serializedPayload.Data, CancellationToken.None);
 
-        _logger.LogTrace($"Sending message: {serializedPayload.PayloadId} to client: {Id}");
+        _logger.LogTrace($"Sending flowPacket: {serializedPayload.PayloadId} to client: {Id}");
 
-        if (!result) DisposeMessagePayloadAndSetStatus(serializedPayload.PayloadId, false);
+        if (!result) DisposeFlowPacketPayloadAndSetStatus(serializedPayload.PayloadId, false);
 
         ObjectPool.Shared.Return(serializedPayload);
     }
@@ -165,6 +166,29 @@ public class Client : IClient
         return true;
     }
 
+    public AsyncPayloadTicket Enqueue(SerializedPayload serializedPayload)
+    {
+        lock (this)
+        {
+            var queueWasSuccessful = _queue.Writer.TryWrite(serializedPayload);
+
+            if (queueWasSuccessful)
+            {
+                _logger.LogTrace($"Enqueue message: {serializedPayload.PayloadId} in client: {Id}");
+
+                var ticket = ObjectPool.Shared.Get<AsyncPayloadTicket>();
+
+                ticket.Setup(serializedPayload.PayloadId);
+
+                _tickets[ticket.PayloadId] = ticket;
+
+                return ticket;
+            }
+
+            throw new ChannelClosedException();
+        }
+    }
+
     public void EnqueueFireAndForget(SerializedPayload serializedPayload)
     {
         _queue.Writer.TryWrite(serializedPayload);
@@ -172,12 +196,12 @@ public class Client : IClient
 
     public void OnPayloadAckReceived(Guid payloadId)
     {
-        DisposeMessagePayloadAndSetStatus(payloadId, true);
+        DisposeFlowPacketPayloadAndSetStatus(payloadId, true);
     }
 
     public void OnPayloadNackReceived(Guid payloadId)
     {
-        DisposeMessagePayloadAndSetStatus(payloadId, false);
+        DisposeFlowPacketPayloadAndSetStatus(payloadId, false);
     }
 
     public void Close()
@@ -228,7 +252,7 @@ public class Client : IClient
         OnDataReceived = null;
     }
 
-    private void DisposeMessagePayloadAndSetStatus(Guid payloadId, bool ack)
+    private void DisposeFlowPacketPayloadAndSetStatus(Guid payloadId, bool ack)
     {
         try
         {
@@ -236,7 +260,7 @@ public class Client : IClient
             {
                 var type = ack ? "Ack" : "nack";
 
-                _logger.LogTrace($"{type} received for message: {payloadId}");
+                _logger.LogTrace($"{type} received for flowPacket: {payloadId}");
 
                 ticket.SetStatus(ack);
 
