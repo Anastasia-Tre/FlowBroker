@@ -1,9 +1,4 @@
-﻿using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Buffers;
 
 namespace FlowBroker.Core.Utils.Buffer;
 
@@ -31,7 +26,8 @@ public class DynamicBuffer : IDisposable
 
             var remainingSize = _buffer.Length - _end;
 
-            if (remainingSize < m.Length) AllocateNewBufferWithExtraSize(m.Length);
+            if (remainingSize < m.Length)
+                AllocateNewBufferWithExtraSize(m.Length);
 
             m.CopyTo(_buffer.AsMemory(_end));
             _end += m.Length;

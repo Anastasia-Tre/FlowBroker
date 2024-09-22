@@ -1,15 +1,8 @@
-﻿using FlowBroker.Core.Serialization;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FlowBroker.Core.Clients;
 using FlowBroker.Core.FlowPackets;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Net.Sockets;
-using FlowBroker.Core.Clients;
 using FlowBroker.Core.Flows;
+using FlowBroker.Core.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace FlowBroker.Core.Payload;
 
@@ -22,11 +15,12 @@ internal class PayloadProcessor : IPayloadProcessor
 {
     private readonly IClientRepository _clientRepository;
     private readonly IDeserializer _deserializer;
+    private readonly IFlowRepository _flowRepository;
     private readonly ILogger<PayloadProcessor> _logger;
     private readonly ISerializer _serializer;
-    private readonly IFlowRepository _flowRepository;
 
-    public PayloadProcessor(IDeserializer deserializer, ISerializer serializer, IClientRepository clientRepository,
+    public PayloadProcessor(IDeserializer deserializer, ISerializer serializer,
+        IClientRepository clientRepository,
         IFlowRepository flowRepository, ILogger<PayloadProcessor> logger)
     {
         _deserializer = deserializer;
@@ -42,7 +36,8 @@ internal class PayloadProcessor : IPayloadProcessor
         {
             var type = _deserializer.ParseFlowPacketType(data);
 
-            _logger.LogInformation($"Received data with type: {type} from client: {clientId}");
+            _logger.LogInformation(
+                $"Received data with type: {type} from client: {clientId}");
 
             var packet = _deserializer.Deserialized(data);
 
@@ -73,9 +68,11 @@ internal class PayloadProcessor : IPayloadProcessor
                     OnConfigureClient(clientId, packet);
                     break;
             }
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
-            _logger.LogError($"Failed to deserialize data from client: {clientId} with error: {e}");
+            _logger.LogError(
+                $"Failed to deserialize data from client: {clientId} with error: {e}");
         }
     }
 
@@ -95,7 +92,8 @@ internal class PayloadProcessor : IPayloadProcessor
                 // packet was not written, probably the channel was completed due to being disposed
                 catch
                 {
-                    _logger.LogError($"Failed to write packet: {packet.Id} to flow: {flow.Name}");
+                    _logger.LogError(
+                        $"Failed to write packet: {packet.Id} to flow: {flow.Name}");
                 }
 
         if (matchedAnyFlow)
@@ -110,7 +108,8 @@ internal class PayloadProcessor : IPayloadProcessor
 
     private void OnFlowPacketAck(Guid clientId, FlowPacket ack)
     {
-        _logger.LogInformation($"Ack received for packet with id: {ack.Id} from client: {clientId}");
+        _logger.LogInformation(
+            $"Ack received for packet with id: {ack.Id} from client: {clientId}");
 
         if (_clientRepository.TryGet(clientId, out var client))
             client.OnPayloadAckReceived(ack.Id);
@@ -118,7 +117,8 @@ internal class PayloadProcessor : IPayloadProcessor
 
     private void OnFlowPacketNack(Guid clientId, FlowPacket nack)
     {
-        _logger.LogInformation($"Nack received for packet with id: {nack.Id} from client: {clientId}");
+        _logger.LogInformation(
+            $"Nack received for packet with id: {nack.Id} from client: {clientId}");
 
         if (_clientRepository.TryGet(clientId, out var client))
             client.OnPayloadNackReceived(nack.Id);
@@ -131,7 +131,8 @@ internal class PayloadProcessor : IPayloadProcessor
         if (client is null)
         {
             _logger.LogWarning($"The client for id {clientId} was not found");
-            SendReceivePayloadError(clientId, subscribeFlow.Id, "Internal error");
+            SendReceivePayloadError(clientId, subscribeFlow.Id,
+                "Internal error");
             return;
         }
 
@@ -139,9 +140,11 @@ internal class PayloadProcessor : IPayloadProcessor
         {
             flow.ClientSubscribed(client);
             SendReceivedPayloadOk(clientId, subscribeFlow.Id);
-        } else
+        }
+        else
         {
-            SendReceivePayloadError(clientId, subscribeFlow.Id, "Queue not found");
+            SendReceivePayloadError(clientId, subscribeFlow.Id,
+                "Queue not found");
         }
     }
 
@@ -152,7 +155,8 @@ internal class PayloadProcessor : IPayloadProcessor
         if (client is null)
         {
             _logger.LogWarning($"The client for id {clientId} was not found");
-            SendReceivePayloadError(clientId, unsubscribeFlow.Id, "Internal error");
+            SendReceivePayloadError(clientId, unsubscribeFlow.Id,
+                "Internal error");
             return;
         }
 
@@ -160,9 +164,11 @@ internal class PayloadProcessor : IPayloadProcessor
         {
             queue.ClientUnsubscribed(client);
             SendReceivedPayloadOk(clientId, unsubscribeFlow.Id);
-        } else
+        }
+        else
         {
-            SendReceivePayloadError(clientId, unsubscribeFlow.Id, "Queue not found");
+            SendReceivePayloadError(clientId, unsubscribeFlow.Id,
+                "Queue not found");
         }
     }
 
@@ -178,7 +184,8 @@ internal class PayloadProcessor : IPayloadProcessor
             if (queue.FlowPath == flowDeclare.FlowPath)
                 SendReceivedPayloadOk(clientId, flowDeclare.Id);
             else
-                SendReceivePayloadError(clientId, flowDeclare.Id, "Queue name already exists");
+                SendReceivePayloadError(clientId, flowDeclare.Id,
+                    "Queue name already exists");
 
             return;
         }
@@ -201,12 +208,10 @@ internal class PayloadProcessor : IPayloadProcessor
     private void OnConfigureClient(Guid clientId, FlowPacket configureClient)
     {
         if (_clientRepository.TryGet(clientId, out var client))
-        {
             SendReceivedPayloadOk(clientId, configureClient.Id);
-        } else
-        {
-            SendReceivePayloadError(clientId, configureClient.Id, "Client not found");
-        }
+        else
+            SendReceivePayloadError(clientId, configureClient.Id,
+                "Client not found");
     }
 
     private void SendReceivedPayloadOk(Guid clientId, Guid payloadId)
@@ -223,7 +228,8 @@ internal class PayloadProcessor : IPayloadProcessor
         }
     }
 
-    private void SendReceivePayloadError(Guid clientId, Guid payloadId, string packet)
+    private void SendReceivePayloadError(Guid clientId, Guid payloadId,
+        string packet)
     {
         if (_clientRepository.TryGet(clientId, out var sendQueue))
         {

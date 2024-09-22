@@ -1,6 +1,5 @@
 ﻿using System.Buffers;
 using System.Collections.Concurrent;
-using System.Net.Sockets;
 using System.Threading.Channels;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Tcp;
@@ -38,11 +37,6 @@ public interface IClient : IDisposable
 
 public class Client : IClient
 {
-    public Guid Id { get; }
-    public bool IsClosed { get; set; }
-    public event EventHandler<ClientSessionDisconnectedEventArgs>? OnDisconnected;
-    public event EventHandler<ClientSessionDataReceivedEventArgs>? OnDataReceived;
-
     private readonly IBinaryDataProcessor _binaryDataProcessor;
 
     private readonly CancellationTokenSource _cancellationTokenSource;
@@ -52,7 +46,8 @@ public class Client : IClient
     private readonly ConcurrentDictionary<Guid, AsyncPayloadTicket> _tickets;
     private ISocket _socket;
 
-    public Client(ILogger<Client> logger, IBinaryDataProcessor binaryDataProcessor = null)
+    public Client(ILogger<Client> logger,
+        IBinaryDataProcessor binaryDataProcessor = null)
     {
         _logger = logger;
 
@@ -60,7 +55,9 @@ public class Client : IClient
 
         _binaryDataProcessor = binaryDataProcessor ?? new BinaryDataProcessor();
 
-        _receiveBuffer = ArrayPool<byte>.Shared.Rent(BinaryProtocolConfiguration.ReceiveDataSize);
+        _receiveBuffer =
+            ArrayPool<byte>.Shared.Rent(BinaryProtocolConfiguration
+                .ReceiveDataSize);
 
         _tickets = new ConcurrentDictionary<Guid, AsyncPayloadTicket>();
 
@@ -69,10 +66,20 @@ public class Client : IClient
         _queue = Channel.CreateUnbounded<SerializedPayload>();
     }
 
+    public Guid Id { get; }
+    public bool IsClosed { get; set; }
+
+    public event EventHandler<ClientSessionDisconnectedEventArgs>?
+        OnDisconnected;
+
+    public event EventHandler<ClientSessionDataReceivedEventArgs>?
+        OnDataReceived;
+
     public void Setup(ISocket socket)
     {
         if (!socket.Connected)
-            throw new InvalidOperationException("The provided tcp socket was not in connected state");
+            throw new InvalidOperationException(
+                "The provided tcp socket was not in connected state");
 
         _socket = socket;
     }
@@ -89,47 +96,6 @@ public class Client : IClient
         }, TaskCreationOptions.LongRunning);
     }
 
-    private void ProcessReceivedData()
-    {
-        try
-        {
-            _binaryDataProcessor.BeginLock();
-
-            while (_binaryDataProcessor.TryRead(out var binaryPayload))
-                try
-                {
-                    var dataReceivedEventArgs = new ClientSessionDataReceivedEventArgs
-                    {
-                        Data = binaryPayload.DataWithoutSize,
-                        Id = Id
-                    };
-
-                    OnDataReceived?.Invoke(this, dataReceivedEventArgs);
-                } finally
-                {
-                    binaryPayload.Dispose();
-                }
-        } finally
-        {
-            _binaryDataProcessor.EndLock();
-        }
-    }
-
-    private async ValueTask ReceiveAsync()
-    {
-        var receivedSize = await _socket.ReceiveAsync(_receiveBuffer, _cancellationTokenSource.Token);
-
-        if (receivedSize == 0)
-        {
-            Close();
-            return;
-        }
-
-        _binaryDataProcessor.Write(_receiveBuffer.AsMemory(0, receivedSize));
-
-        ProcessReceivedData();
-    }
-
     public void StartSendProcess()
     {
         ThrowIfDisposed();
@@ -144,16 +110,21 @@ public class Client : IClient
     {
         var serializedPayload = await _queue.Reader.ReadAsync();
 
-        var result = await SendAsync(serializedPayload.Data, CancellationToken.None);
+        var result =
+            await SendAsync(serializedPayload.Data, CancellationToken.None);
 
-        _logger.LogTrace($"Sending flowPacket: {serializedPayload.PayloadId} to client: {Id}");
+        _logger.LogTrace(
+            $"Sending flowPacket: {serializedPayload.PayloadId} to client: {Id}");
 
-        if (!result) DisposeFlowPacketPayloadAndSetStatus(serializedPayload.PayloadId, false);
+        if (!result)
+            DisposeFlowPacketPayloadAndSetStatus(serializedPayload.PayloadId,
+                false);
 
         ObjectPool.Shared.Return(serializedPayload);
     }
 
-    public async Task<bool> SendAsync(Memory<byte> payload, CancellationToken cancellationToken)
+    public async Task<bool> SendAsync(Memory<byte> payload,
+        CancellationToken cancellationToken)
     {
         var sendSize = await _socket.SendAsync(payload, cancellationToken);
 
@@ -174,7 +145,8 @@ public class Client : IClient
 
             if (queueWasSuccessful)
             {
-                _logger.LogTrace($"Enqueue flowPacket: {serializedPayload.PayloadId} in client: {Id}");
+                _logger.LogTrace(
+                    $"Enqueue flowPacket: {serializedPayload.PayloadId} in client: {Id}");
 
                 var ticket = ObjectPool.Shared.Get<AsyncPayloadTicket>();
 
@@ -224,11 +196,13 @@ public class Client : IClient
 
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
-                    var disconnectedEventArgs = new ClientSessionDisconnectedEventArgs { Id = Id };
+                    var disconnectedEventArgs =
+                        new ClientSessionDisconnectedEventArgs { Id = Id };
                     OnDisconnected?.Invoke(this, disconnectedEventArgs);
                     OnDisconnected = null;
                 });
-            } catch
+            }
+            catch
             {
             }
         }
@@ -239,10 +213,56 @@ public class Client : IClient
         Close();
     }
 
+    private void ProcessReceivedData()
+    {
+        try
+        {
+            _binaryDataProcessor.BeginLock();
+
+            while (_binaryDataProcessor.TryRead(out var binaryPayload))
+                try
+                {
+                    var dataReceivedEventArgs =
+                        new ClientSessionDataReceivedEventArgs
+                        {
+                            Data = binaryPayload.DataWithoutSize,
+                            Id = Id
+                        };
+
+                    OnDataReceived?.Invoke(this, dataReceivedEventArgs);
+                }
+                finally
+                {
+                    binaryPayload.Dispose();
+                }
+        }
+        finally
+        {
+            _binaryDataProcessor.EndLock();
+        }
+    }
+
+    private async ValueTask ReceiveAsync()
+    {
+        var receivedSize = await _socket.ReceiveAsync(_receiveBuffer,
+            _cancellationTokenSource.Token);
+
+        if (receivedSize == 0)
+        {
+            Close();
+            return;
+        }
+
+        _binaryDataProcessor.Write(_receiveBuffer.AsMemory(0, receivedSize));
+
+        ProcessReceivedData();
+    }
+
     private void ThrowIfDisposed()
     {
         if (IsClosed)
-            throw new ObjectDisposedException("Session has been disposed previously");
+            throw new ObjectDisposedException(
+                "Session has been disposed previously");
     }
 
     private void OnReceivedDataDisposed()
@@ -260,13 +280,15 @@ public class Client : IClient
             {
                 var type = ack ? "Ack" : "nack";
 
-                _logger.LogTrace($"{type} received for flowPacket: {payloadId}");
+                _logger.LogTrace(
+                    $"{type} received for flowPacket: {payloadId}");
 
                 ticket.SetStatus(ack);
 
                 ObjectPool.Shared.Return(ticket);
             }
-        } catch
+        }
+        catch
         {
         }
     }
@@ -278,7 +300,7 @@ public class ClientRepository : DataRepository<Guid, IClient>, IClientRepository
 {
 }
 
-public sealed class ClientSessionDisconnectedEventArgs : System.EventArgs
+public sealed class ClientSessionDisconnectedEventArgs : EventArgs
 {
     public Guid Id { get; set; }
 }

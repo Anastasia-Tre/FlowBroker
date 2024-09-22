@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FlowBroker.Core.RouteMatching;
+﻿namespace FlowBroker.Core.RouteMatching;
 
 public interface IRouteMatcher
 {
@@ -22,7 +16,8 @@ internal class RouteMatcher : IRouteMatcher
         var flowPacketRouteSegments = flowPacketRoute.Split('/');
         var queueRouteSegments = flowRoute.Split('/');
 
-        var minSegmentCount = Math.Min(flowPacketRouteSegments.Length, queueRouteSegments.Length);
+        var minSegmentCount = Math.Min(flowPacketRouteSegments.Length,
+            queueRouteSegments.Length);
 
         for (var i = 0; i < minSegmentCount; i++)
         {

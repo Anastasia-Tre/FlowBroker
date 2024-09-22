@@ -1,10 +1,5 @@
-﻿using FlowBroker.Core.Clients;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
+using FlowBroker.Core.Clients;
 
 namespace FlowBroker.Core.RouteMatching;
 
@@ -37,7 +32,8 @@ internal class Dispatcher : IDispatcher
                 throw new Exception("Added SendQueue already exists");
 
             _clients[client.Id] = client;
-        } finally
+        }
+        finally
         {
             _wrLock.ExitWriteLock();
         }
@@ -49,7 +45,8 @@ internal class Dispatcher : IDispatcher
         {
             _wrLock.EnterWriteLock();
             return _clients.Remove(client.Id, out _);
-        } finally
+        }
+        finally
         {
             _wrLock.ExitWriteLock();
         }
@@ -61,11 +58,12 @@ internal class Dispatcher : IDispatcher
         {
             _wrLock.EnterReadLock();
 
-            foreach (var (_, client) in _clients) 
+            foreach (var (_, client) in _clients)
                 return client;
 
             return null;
-        } finally
+        }
+        finally
         {
             _wrLock.ExitReadLock();
         }

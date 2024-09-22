@@ -1,11 +1,6 @@
-﻿using FlowBroker.Core.Utils.Pooling;
-using System;
-using System.Buffers;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Buffers;
 using FlowBroker.Core.Utils.Buffer;
+using FlowBroker.Core.Utils.Pooling;
 
 namespace FlowBroker.Core.Payload;
 
@@ -19,7 +14,6 @@ public interface IBinaryDataProcessor : IDisposable
 
     bool TryRead(out BinaryPayload binaryPayload);
 }
-
 
 public class BinaryDataProcessor : IBinaryDataProcessor
 {
@@ -55,18 +49,24 @@ public class BinaryDataProcessor : IBinaryDataProcessor
 
             if (_disposed) return false;
 
-            var canReadHeaderSize = _dynamicBuffer.CanRead(BinaryProtocolConfiguration.PayloadHeaderSize);
+            var canReadHeaderSize =
+                _dynamicBuffer.CanRead(BinaryProtocolConfiguration
+                    .PayloadHeaderSize);
 
             if (!canReadHeaderSize) return false;
 
-            var headerSizeBytes = _dynamicBuffer.Read(BinaryProtocolConfiguration.PayloadHeaderSize);
+            var headerSizeBytes =
+                _dynamicBuffer.Read(BinaryProtocolConfiguration
+                    .PayloadHeaderSize);
             var headerSize = BitConverter.ToInt32(headerSizeBytes);
 
-            var canReadPayload = _dynamicBuffer.CanRead(BinaryProtocolConfiguration.PayloadHeaderSize + headerSize);
+            var canReadPayload = _dynamicBuffer.CanRead(
+                BinaryProtocolConfiguration.PayloadHeaderSize + headerSize);
 
             if (!canReadPayload) return false;
 
-            var payload = _dynamicBuffer.ReadAndClear(BinaryProtocolConfiguration.PayloadHeaderSize + headerSize);
+            var payload = _dynamicBuffer.ReadAndClear(
+                BinaryProtocolConfiguration.PayloadHeaderSize + headerSize);
 
             var receiveDataBuffer = ArrayPool<byte>.Shared.Rent(payload.Length);
 

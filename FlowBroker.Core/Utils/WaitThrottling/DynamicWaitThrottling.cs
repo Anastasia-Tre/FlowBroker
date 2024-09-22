@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace FlowBroker.Core.Utils.WaitThrottling;
+﻿namespace FlowBroker.Core.Utils.WaitThrottling;
 
 public class DynamicWaitThrottling
 {
-    public DynamicWaitThrottling(int baseDelay = 1, int multiplier = 4, int maxDelay = 100)
+    public DynamicWaitThrottling(int baseDelay = 1, int multiplier = 4,
+        int maxDelay = 100)
     {
         BaseDelay = baseDelay;
         CurrentDelay = baseDelay;
@@ -23,7 +18,8 @@ public class DynamicWaitThrottling
 
     public Task WaitAsync(CancellationToken? cancellationToken = null)
     {
-        return Task.Delay(CurrentDelay, cancellationToken ?? CancellationToken.None);
+        return Task.Delay(CurrentDelay,
+            cancellationToken ?? CancellationToken.None);
     }
 
     public Task WaitAndIncrease(CancellationToken? cancellationToken = null)
@@ -31,7 +27,8 @@ public class DynamicWaitThrottling
         try
         {
             return WaitAsync(cancellationToken);
-        } finally
+        }
+        finally
         {
             Increase();
         }
@@ -42,7 +39,8 @@ public class DynamicWaitThrottling
         if (CurrentDelay * Multiplier > MaxDelay)
         {
             // do nothing
-        } else
+        }
+        else
         {
             CurrentDelay *= Multiplier;
         }

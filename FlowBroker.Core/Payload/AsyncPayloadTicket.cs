@@ -1,9 +1,4 @@
 ﻿using FlowBroker.Core.Utils.Pooling;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FlowBroker.Core.Payload;
 
@@ -35,7 +30,9 @@ public class AsyncPayloadTicket : IPooledObject
     {
         lock (this)
         {
-            if (_isStatusSet) throw new Exception($"{nameof(SerializedPayload)} status is already set");
+            if (_isStatusSet)
+                throw new Exception(
+                    $"{nameof(SerializedPayload)} status is already set");
 
             _isStatusSet = true;
 

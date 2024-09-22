@@ -19,16 +19,18 @@ public interface IBroker : IDisposable
 public class Broker : IBroker
 {
     private readonly IClientRepository _clientRepository;
+    private readonly IFlowPacketRepository _flowPacketRepository;
+    private readonly IFlowRepository _flowRepository;
     private readonly IListener _listener;
     private readonly ILogger<Broker> _logger;
-    private readonly IFlowPacketRepository _flowPacketRepository;
     private readonly IPayloadProcessor _payloadProcessor;
-    private readonly IFlowRepository _flowRepository;
     private bool _disposed;
 
-    public Broker(IListener listener, IPayloadProcessor payloadProcessor, IClientRepository clientRepository,
+    public Broker(IListener listener, IPayloadProcessor payloadProcessor,
+        IClientRepository clientRepository,
         IFlowRepository flowRepository,
-        IFlowPacketRepository flowPacketRepository, IServiceProvider serviceProvider, ILogger<Broker> logger)
+        IFlowPacketRepository flowPacketRepository,
+        IServiceProvider serviceProvider, ILogger<Broker> logger)
     {
         _listener = listener;
         _payloadProcessor = payloadProcessor;
@@ -84,12 +86,14 @@ public class Broker : IBroker
             clientSession.StartSendProcess();
 
             _logger.LogInformation($"Client: {clientSession.Id} connected");
-        } catch (ObjectDisposedException)
+        }
+        catch (ObjectDisposedException)
         {
         }
     }
 
-    private void ClientDisconnected(object clientSession, ClientSessionDisconnectedEventArgs eventArgs)
+    private void ClientDisconnected(object clientSession,
+        ClientSessionDisconnectedEventArgs eventArgs)
     {
         if (clientSession is IClient client)
         {
@@ -102,14 +106,17 @@ public class Broker : IBroker
         }
     }
 
-    private void ClientDataReceived(object clientSession, ClientSessionDataReceivedEventArgs eventArgs)
+    private void ClientDataReceived(object clientSession,
+        ClientSessionDataReceivedEventArgs eventArgs)
     {
         try
         {
             _payloadProcessor.OnDataReceived(eventArgs.Id, eventArgs.Data);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
-            _logger.LogError($"An error occured while trying to dispatch flowPackets, error: {e}");
+            _logger.LogError(
+                $"An error occured while trying to dispatch flowPackets, error: {e}");
         }
     }
 }

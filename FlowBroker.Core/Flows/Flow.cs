@@ -1,12 +1,11 @@
-﻿using FlowBroker.Core.Clients;
+﻿using System.Threading.Channels;
+using FlowBroker.Core.Clients;
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
-using FlowBroker.Core.Serialization;
-using FlowBroker.Core.Utils.Persistence;
-using Microsoft.Extensions.Logging;
-using System.Threading.Channels;
 using FlowBroker.Core.RouteMatching;
+using FlowBroker.Core.Serialization;
 using FlowBroker.Core.Utils.WaitThrottling;
+using Microsoft.Extensions.Logging;
 
 namespace FlowBroker.Core.Flows;
 
@@ -30,19 +29,20 @@ public interface IFlow : IDisposable
 public class Flow : IFlow
 {
     private readonly IDispatcher _dispatcher;
-    private readonly ILogger<Flow> _logger;
 
     private readonly IFlowPacketRepository _flowPacketRepo;
-
-    private readonly Channel<Guid> _queueChannel;
+    private readonly ILogger<Flow> _logger;
 
     private readonly IRouteMatcher _pathMatcher;
+
+    private readonly Channel<Guid> _queueChannel;
     private readonly ISerializer _serializer;
     private readonly DynamicWaitThrottling _throttling;
 
     private bool _disposed;
 
-    public Flow(IDispatcher dispatcher, IFlowPacketRepository flowPacketRepo, IRouteMatcher pathMatcher,
+    public Flow(IDispatcher dispatcher, IFlowPacketRepository flowPacketRepo,
+        IRouteMatcher pathMatcher,
         ISerializer serializer, ILogger<Flow> logger)
     {
         _dispatcher = dispatcher;
@@ -87,7 +87,8 @@ public class Flow : IFlow
     {
         ThrowIfDisposed();
 
-        _logger.LogInformation($"Flow {Name} received flowPacket with id: {flowPacket.Id}");
+        _logger.LogInformation(
+            $"Flow {Name} received flowPacket with id: {flowPacket.Id}");
 
         // create FlowFlowPacket from flowPacket
         flowPacket.FlowName = Name;
@@ -108,7 +109,8 @@ public class Flow : IFlow
 
     public void ClientSubscribed(IClient client)
     {
-        _logger.LogInformation($"Added new subscription to flow: {Name} with id: {client.Id}");
+        _logger.LogInformation(
+            $"Added new subscription to flow: {Name} with id: {client.Id}");
         ThrowIfDisposed();
         _dispatcher.Add(client);
     }
@@ -117,14 +119,17 @@ public class Flow : IFlow
     {
         ThrowIfDisposed();
         var success = _dispatcher.Remove(client);
-        if (success) _logger.LogInformation($"Removed subscription from flow: {Name} with id: {client.Id}");
+        if (success)
+            _logger.LogInformation(
+                $"Removed subscription from flow: {Name} with id: {client.Id}");
     }
 
     public async Task ReadNextFlowPacket()
     {
         ThrowIfDisposed();
 
-        if (_queueChannel.Reader.TryRead(out var flowPacketId)) await ProcessFlowPacket(flowPacketId);
+        if (_queueChannel.Reader.TryRead(out var flowPacketId))
+            await ProcessFlowPacket(flowPacketId);
     }
 
     private void ReadPayloadsFromFlowPacketRepo()
@@ -134,9 +139,11 @@ public class Flow : IFlow
         var flowPackets = _flowPacketRepo.GetAll();
 
         if (flowPackets.Any())
-            _logger.LogWarning($"Found {flowPackets.Count()} flowPackets while initializing the flow: {Name}");
+            _logger.LogWarning(
+                $"Found {flowPackets.Count()} flowPackets while initializing the flow: {Name}");
         else
-            _logger.LogWarning($"No flowPackets was found while initializing the flow: {Name}");
+            _logger.LogWarning(
+                $"No flowPackets was found while initializing the flow: {Name}");
 
         foreach (var flowPacket in flowPackets)
             _queueChannel.Writer.TryWrite(flowPacket.Id);
@@ -153,7 +160,8 @@ public class Flow : IFlow
         }
     }
 
-    private async ValueTask SendSerializedPayloadToNextAvailableClient(SerializedPayload serializedPayload)
+    private async ValueTask SendSerializedPayloadToNextAvailableClient(
+        SerializedPayload serializedPayload)
     {
         // keep trying to find an available client 
         while (true)
@@ -178,7 +186,8 @@ public class Flow : IFlow
                 var ticket = client.Enqueue(serializedPayload);
                 ticket.OnStatusChanged += OnStatusChanged;
                 break;
-            } catch (ChannelClosedException)
+            }
+            catch (ChannelClosedException)
             {
             }
         }
@@ -194,13 +203,15 @@ public class Flow : IFlow
 
     private void OnFlowPacketAck(Guid flowPacketId)
     {
-        _logger.LogInformation($"Received ack for flowPacket with id: {flowPacketId} in flow: {Name}");
+        _logger.LogInformation(
+            $"Received ack for flowPacket with id: {flowPacketId} in flow: {Name}");
         _flowPacketRepo.Remove(flowPacketId);
     }
 
     private void OnFlowPacketNack(Guid flowPacketId)
     {
-        _logger.LogInformation($"Received Nack for flowPacket with id: {flowPacketId} in flow: {Name}");
+        _logger.LogInformation(
+            $"Received Nack for flowPacket with id: {flowPacketId} in flow: {Name}");
         _queueChannel.Writer.TryWrite(flowPacketId);
     }
 
