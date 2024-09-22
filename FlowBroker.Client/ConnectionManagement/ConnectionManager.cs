@@ -1,10 +1,10 @@
-﻿using FlowBroker.Core.Clients;
+﻿using System.Net;
+using FlowBroker.Client.DataProcessing;
+using FlowBroker.Core.Clients;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Tcp;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Net;
-using FlowBroker.Client.DataProcessing;
 
 namespace FlowBroker.Client.ConnectionManagement;
 
@@ -20,7 +20,8 @@ public interface IConnectionManager : IDisposable
     void Reconnect();
     void Disconnect();
 
-    Task<bool> SendAsync(SerializedPayload serializedPayload, CancellationToken cancellationToken);
+    Task<bool> SendAsync(SerializedPayload serializedPayload,
+        CancellationToken cancellationToken);
 }
 
 public class ConnectionManager : IConnectionManager
@@ -31,7 +32,8 @@ public class ConnectionManager : IConnectionManager
     private readonly IServiceProvider _serviceProvider;
     private EndPoint EndPoint;
 
-    public ConnectionManager(IReceiveDataProcessor receiveDataProcessor, ILogger<ConnectionManager> logger,
+    public ConnectionManager(IReceiveDataProcessor receiveDataProcessor,
+        ILogger<ConnectionManager> logger,
         IServiceProvider serviceProvider)
     {
         _receiveDataProcessor = receiveDataProcessor;
@@ -113,9 +115,12 @@ public class ConnectionManager : IConnectionManager
     public void Reconnect()
     {
         if (Socket.Connected)
-            throw new InvalidOperationException("The socket object is in connected state, cannot be reconnected");
+            throw new InvalidOperationException(
+                "The socket object is in connected state, cannot be reconnected");
 
-        Connect(EndPoint ?? throw new ArgumentNullException("No configuration exists for reconnection"));
+        Connect(EndPoint ??
+                throw new ArgumentNullException(
+                    "No configuration exists for reconnection"));
     }
 
     public void Disconnect()
@@ -123,7 +128,8 @@ public class ConnectionManager : IConnectionManager
         Socket?.Disconnect();
     }
 
-    public async Task<bool> SendAsync(SerializedPayload serializedPayload, CancellationToken cancellationToken)
+    public async Task<bool> SendAsync(SerializedPayload serializedPayload,
+        CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -146,9 +152,11 @@ public class ConnectionManager : IConnectionManager
             {
                 await _semaphore.WaitAsync(cancellationToken);
 
-                var result = await Client.SendAsync(serializedPayload.Data, cancellationToken);
+                var result = await Client.SendAsync(serializedPayload.Data,
+                    cancellationToken);
 
-                _logger.LogTrace($"Sending payload with id {serializedPayload.PayloadId}");
+                _logger.LogTrace(
+                    $"Sending payload with id {serializedPayload.PayloadId}");
 
                 if (result) return true;
             }
@@ -176,12 +184,14 @@ public class ConnectionManager : IConnectionManager
         Disconnect();
     }
 
-    private void ClientDataReceived(object clientSession, ClientSessionDataReceivedEventArgs eventArgs)
+    private void ClientDataReceived(object clientSession,
+        ClientSessionDataReceivedEventArgs eventArgs)
     {
         _receiveDataProcessor.DataReceived(clientSession, eventArgs);
     }
 
-    private void ClientDisconnected(object clientSession, ClientSessionDisconnectedEventArgs eventArgs)
+    private void ClientDisconnected(object clientSession,
+        ClientSessionDisconnectedEventArgs eventArgs)
     {
         _logger.LogInformation("Broker client disconnected from server");
 

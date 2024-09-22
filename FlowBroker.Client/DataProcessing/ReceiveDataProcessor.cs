@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
-using FlowBroker.Client.Subscriptions;
+﻿using FlowBroker.Client.Subscriptions;
 using FlowBroker.Client.TaskManager;
 using FlowBroker.Core.Clients;
 using FlowBroker.Core.FlowPackets;
@@ -9,7 +8,8 @@ namespace FlowBroker.Client.DataProcessing;
 
 public interface IReceiveDataProcessor
 {
-    void DataReceived(object clientSessionObject, ClientSessionDataReceivedEventArgs dataReceivedEventArgs);
+    void DataReceived(object clientSessionObject,
+        ClientSessionDataReceivedEventArgs dataReceivedEventArgs);
 
     event Action<Guid> OnOkReceived;
     event Action<Guid, FlowPacket> OnErrorReceived;
@@ -35,7 +35,8 @@ public class ReceiveDataProcessor : IReceiveDataProcessor
 
     public event Action<Guid, FlowPacket> OnErrorReceived;
 
-    public void DataReceived(object clientSessionObject, ClientSessionDataReceivedEventArgs dataReceivedEventArgs)
+    public void DataReceived(object clientSessionObject,
+        ClientSessionDataReceivedEventArgs dataReceivedEventArgs)
     {
         var data = dataReceivedEventArgs.Data;
         var payloadType = _deserializer.ParseFlowPacketType(data);
@@ -61,8 +62,9 @@ public class ReceiveDataProcessor : IReceiveDataProcessor
     {
         Interlocked.Increment(ref _receivedPacketsCount);
         var queuePacket = _deserializer.Deserialized(payloadData);
-        if (_subscriptionStore.TryGet(queuePacket.FlowName, out var subscription))
-            ((Subscription) subscription).OnPacketReceived(queuePacket);
+        if (_subscriptionStore.TryGet(queuePacket.FlowName,
+                out var subscription))
+            ((Subscription)subscription).OnPacketReceived(queuePacket);
     }
 
     private void OnOk(Memory<byte> payloadData)

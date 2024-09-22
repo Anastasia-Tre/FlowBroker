@@ -9,7 +9,8 @@ public class SubscriptionPacket
 
     public Memory<byte> Data { get; set; }
 
-    internal event Action<Guid, bool, CancellationToken> OnPacketProcessedByClient;
+    internal event Action<Guid, bool, CancellationToken>
+        OnPacketProcessedByClient;
 
     public void Ack(CancellationToken? cancellationToken = null)
     {
@@ -17,7 +18,8 @@ public class SubscriptionPacket
 
         if (cancellationToken is null)
         {
-            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            var cancellationTokenSource =
+                new CancellationTokenSource(TimeSpan.FromMinutes(1));
             token = cancellationTokenSource.Token;
         }
         else
@@ -34,7 +36,8 @@ public class SubscriptionPacket
 
         if (cancellationToken is null)
         {
-            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            var cancellationTokenSource =
+                new CancellationTokenSource(TimeSpan.FromMinutes(1));
             token = cancellationTokenSource.Token;
         }
         else

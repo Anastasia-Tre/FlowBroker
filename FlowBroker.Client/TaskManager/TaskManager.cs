@@ -1,11 +1,12 @@
-﻿using FlowBroker.Core.FlowPackets;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using FlowBroker.Core.FlowPackets;
 
 namespace FlowBroker.Client.TaskManager;
 
 public interface ITaskManager : IDisposable
 {
-    Task<SendAsyncResult> Setup(Guid id, bool completeOnAcknowledge, CancellationToken cancellationToken);
+    Task<SendAsyncResult> Setup(Guid id, bool completeOnAcknowledge,
+        CancellationToken cancellationToken);
 
     void OnPayloadOkResult(Guid payloadId);
     void OnPayloadErrorResult(Guid payloadId, FlowPacket error);
@@ -15,16 +16,20 @@ public interface ITaskManager : IDisposable
 
 internal class TaskManager : ITaskManager
 {
-    private readonly ConcurrentDictionary<Guid, SendPayloadTaskCompletionSource> _tasks;
+    private readonly ConcurrentDictionary<Guid, SendPayloadTaskCompletionSource>
+        _tasks;
+
     private bool _disposed;
 
     public TaskManager()
     {
-        _tasks = new ConcurrentDictionary<Guid, SendPayloadTaskCompletionSource>();
+        _tasks =
+            new ConcurrentDictionary<Guid, SendPayloadTaskCompletionSource>();
         RunTaskCancelledCheckProcess();
     }
 
-    public Task<SendAsyncResult> Setup(Guid id, bool completeOnAcknowledge, CancellationToken cancellationToken)
+    public Task<SendAsyncResult> Setup(Guid id, bool completeOnAcknowledge,
+        CancellationToken cancellationToken)
     {
         var tcs = new TaskCompletionSource<SendAsyncResult>();
 

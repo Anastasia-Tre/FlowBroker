@@ -1,12 +1,17 @@
 ﻿namespace FlowBroker.Client.TaskManager;
 
 /// <summary>
-/// Contains logic for completing task returned to client on whether <see cref="CompleteOnAcknowledge" /> is true or
-/// false
+///     Contains logic for completing task returned to client on whether <see cref="CompleteOnAcknowledge" /> is true or
+///     false
 /// </summary>
 internal class SendPayloadTaskCompletionSource
 {
-    public TaskCompletionSource<SendAsyncResult> TaskCompletionSource { get; set; }
+    public TaskCompletionSource<SendAsyncResult> TaskCompletionSource
+    {
+        get;
+        set;
+    }
+
     public bool CompleteOnAcknowledge { get; set; }
     public CancellationToken CancellationToken { get; set; }
 

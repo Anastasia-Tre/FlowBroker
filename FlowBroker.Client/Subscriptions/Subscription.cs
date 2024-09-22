@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using FlowBroker.Client.ConnectionManagement;
+﻿using FlowBroker.Client.ConnectionManagement;
 using FlowBroker.Client.DataProcessing;
 using FlowBroker.Client.Payload;
 using FlowBroker.Core.FlowPackets;
@@ -21,7 +20,8 @@ internal class Subscription : ISubscription
     private readonly ISendDataProcessor _sendDataProcessor;
     private bool _disposed;
 
-    public Subscription(IPayloadFactory payloadFactory, IConnectionManager connectionManager,
+    public Subscription(IPayloadFactory payloadFactory,
+        IConnectionManager connectionManager,
         ISendDataProcessor sendDataProcessor)
     {
         _payloadFactory = payloadFactory;
@@ -43,12 +43,14 @@ internal class Subscription : ISubscription
 
         _connectionManager.OnConnected -= OnConnected;
 
-        var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
+        var cancellationTokenSource =
+            new CancellationTokenSource(TimeSpan.FromMinutes(1));
 
         await UnSubscribeAsync(cancellationTokenSource.Token);
     }
 
-    public async Task SetupAsync(string name, CancellationToken cancellationToken)
+    public async Task SetupAsync(string name,
+        CancellationToken cancellationToken)
     {
         Name = name;
         await SubscribeAsync(cancellationToken);
@@ -68,19 +70,23 @@ internal class Subscription : ISubscription
                 FlowName = flowPacket.FlowName
             };
 
-            subscriptionPacket.OnPacketProcessedByClient += OnPacketProcessedByClient;
+            subscriptionPacket.OnPacketProcessedByClient +=
+                OnPacketProcessedByClient;
 
             PacketReceived?.Invoke(subscriptionPacket);
         }
         // if packet process failed then mark it as nacked
         catch
         {
-            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
-            OnPacketProcessedByClient(flowPacket.Id, false, cancellationTokenSource.Token);
+            var cancellationTokenSource =
+                new CancellationTokenSource(TimeSpan.FromMinutes(1));
+            OnPacketProcessedByClient(flowPacket.Id, false,
+                cancellationTokenSource.Token);
         }
     }
 
-    private async void OnPacketProcessedByClient(Guid packetId, bool ack, CancellationToken cancellationToken)
+    private async void OnPacketProcessedByClient(Guid packetId, bool ack,
+        CancellationToken cancellationToken)
     {
         if (ack)
             await AckAsync(packetId, cancellationToken);
@@ -92,21 +98,26 @@ internal class Subscription : ISubscription
     {
         ThrowIfDisposed();
 
-        var serializedPayload = _payloadFactory.NewPacket(FlowPacketType.SubscribeFlow, "", Name);
+        var serializedPayload =
+            _payloadFactory.NewPacket(FlowPacketType.SubscribeFlow, "", Name);
 
-        var result = await _sendDataProcessor.SendAsync(serializedPayload, true, cancellationToken);
+        var result = await _sendDataProcessor.SendAsync(serializedPayload, true,
+            cancellationToken);
 
         if (!result.IsSuccess)
-            throw new Exception($"Failed to create subscription, error: {result.InternalErrorCode}");
+            throw new Exception(
+                $"Failed to create subscription, error: {result.InternalErrorCode}");
     }
 
     private async Task UnSubscribeAsync(CancellationToken cancellationToken)
     {
-        var serializedPayload = _payloadFactory.NewPacket(FlowPacketType.UnsubscribeFlow, "", Name);
+        var serializedPayload =
+            _payloadFactory.NewPacket(FlowPacketType.UnsubscribeFlow, "", Name);
 
         try
         {
-            await _sendDataProcessor.SendAsync(serializedPayload, true, cancellationToken);
+            await _sendDataProcessor.SendAsync(serializedPayload, true,
+                cancellationToken);
         }
         catch (ObjectDisposedException)
         {
@@ -114,16 +125,22 @@ internal class Subscription : ISubscription
         }
     }
 
-    private async Task AckAsync(Guid packetId, CancellationToken cancellationToken)
+    private async Task AckAsync(Guid packetId,
+        CancellationToken cancellationToken)
     {
-        var serializedPayload = _payloadFactory.NewPacket(FlowPacketType.Ack, "", packetId.ToByteArray());
-        await _sendDataProcessor.SendAsync(serializedPayload, false, cancellationToken);
+        var serializedPayload = _payloadFactory.NewPacket(FlowPacketType.Ack,
+            "", packetId.ToByteArray());
+        await _sendDataProcessor.SendAsync(serializedPayload, false,
+            cancellationToken);
     }
 
-    private async Task NackAsync(Guid packetId, CancellationToken cancellationToken)
+    private async Task NackAsync(Guid packetId,
+        CancellationToken cancellationToken)
     {
-        var serializedPayload = _payloadFactory.NewPacket(FlowPacketType.Nack, "", packetId.ToByteArray());
-        await _sendDataProcessor.SendAsync(serializedPayload, false, cancellationToken);
+        var serializedPayload = _payloadFactory.NewPacket(FlowPacketType.Nack,
+            "", packetId.ToByteArray());
+        await _sendDataProcessor.SendAsync(serializedPayload, false,
+            cancellationToken);
     }
 
 
@@ -135,11 +152,14 @@ internal class Subscription : ISubscription
     private void ThrowIfDisposed()
     {
         if (_disposed)
-            throw new ObjectDisposedException($"{nameof(Subscription)} is disposed and cannot be accessed");
+            throw new ObjectDisposedException(
+                $"{nameof(Subscription)} is disposed and cannot be accessed");
     }
 }
 
-public interface ISubscriptionRepository : IDataRepository<string, ISubscription>, IAsyncDisposable;
+public interface
+    ISubscriptionRepository : IDataRepository<string, ISubscription>,
+    IAsyncDisposable;
 
 public class SubscriptionRepository : DataRepository<string, ISubscription>,
     ISubscriptionRepository

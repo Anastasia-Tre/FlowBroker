@@ -1,20 +1,17 @@
-﻿using FlowBroker.Core.Payload;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using FlowBroker.Core.FlowPackets;
+using FlowBroker.Core.Payload;
 using FlowBroker.Core.Serialization;
 
 namespace FlowBroker.Client.Payload;
 
 public interface IPayloadFactory
 {
-    SerializedPayload NewPacket(FlowPacketType type, string path, byte[] data = null);
+    SerializedPayload NewPacket(FlowPacketType type, string path,
+        byte[] data = null);
+
     SerializedPayload NewPacket(FlowPacketType type, string path, string data);
 }
-
 
 public class PayloadFactory : IPayloadFactory
 {
@@ -25,9 +22,10 @@ public class PayloadFactory : IPayloadFactory
         _serializer = serializer;
     }
 
-    public SerializedPayload NewPacket(FlowPacketType type, string path,byte[] data = null)
+    public SerializedPayload NewPacket(FlowPacketType type, string path,
+        byte[] data = null)
     {
-        var payload = new FlowPacket()
+        var payload = new FlowPacket
         {
             Id = Guid.NewGuid(),
             PacketType = type,
@@ -38,7 +36,8 @@ public class PayloadFactory : IPayloadFactory
         return _serializer.Serialize(payload);
     }
 
-    public SerializedPayload NewPacket(FlowPacketType type, string path, string data)
+    public SerializedPayload NewPacket(FlowPacketType type, string path,
+        string data)
     {
         return NewPacket(type, path, Encoding.ASCII.GetBytes(data));
     }
