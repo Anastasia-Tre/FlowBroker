@@ -3,6 +3,7 @@ using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Flows;
 using FlowBroker.Core.Serialization;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace FlowBroker.Core.Payload;
 
@@ -35,11 +36,10 @@ internal class PayloadProcessor : IPayloadProcessor
         try
         {
             var type = _deserializer.ParseFlowPacketType(data);
+            var packet = _deserializer.Deserialized(type, data);
 
             _logger.LogInformation(
-                $"Received data with type: {type} from client: {clientId}");
-
-            var packet = _deserializer.Deserialized(data);
+                $"Received data with type: {type} from client: {clientId} : {Encoding.UTF8.GetString(packet.Data.ToArray())}");
 
             switch (type)
             {
@@ -236,7 +236,7 @@ internal class PayloadProcessor : IPayloadProcessor
             var error = new FlowPacket
             {
                 Id = payloadId,
-                //FlowPacket = packet,
+                Data = Encoding.ASCII.GetBytes(packet),
                 PacketType = FlowPacketType.Error
             };
             var sendPayload = _serializer.Serialize(error);

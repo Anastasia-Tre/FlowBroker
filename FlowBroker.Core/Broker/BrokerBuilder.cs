@@ -6,6 +6,8 @@ using FlowBroker.Core.PathMatching;
 using FlowBroker.Core.Serialization;
 using FlowBroker.Core.Tcp;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace FlowBroker.Core.Broker;
 
@@ -16,6 +18,8 @@ public class BrokerBuilder
     public BrokerBuilder()
     {
         _serviceCollection = new ServiceCollection();
+
+        _serviceCollection.AddLogging();
 
         _serviceCollection.AddSingleton<IBroker, Broker>();
 
@@ -41,5 +45,25 @@ public class BrokerBuilder
     {
         var serviceProvider = _serviceCollection.BuildServiceProvider();
         return serviceProvider.GetRequiredService<IBroker>();
+    }
+
+    public BrokerBuilder UseEndPoint(IPEndPoint endPoint)
+    {
+        var connectionProvider = new ConnectionProvider { IpEndPoint = endPoint };
+        _serviceCollection.AddSingleton(connectionProvider);
+        return this;
+    }
+
+    public BrokerBuilder ConfigureLogger(Action<ILoggingBuilder> loggerBuilder)
+    {
+        _serviceCollection.AddLogging(loggerBuilder);
+        return this;
+    }
+
+    public BrokerBuilder AddConsoleLog()
+    {
+        ConfigureLogger(builder => { builder.AddConsole(); });
+
+        return this;
     }
 }

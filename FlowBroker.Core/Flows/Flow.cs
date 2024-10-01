@@ -90,7 +90,6 @@ public class Flow : IFlow
         _logger.LogInformation(
             $"Flow {Name} received flowPacket with id: {flowPacket.Id}");
 
-        // create FlowFlowPacket from flowPacket
         flowPacket.FlowName = Name;
 
         // persist the flowPacket

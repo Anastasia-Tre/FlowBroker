@@ -106,7 +106,7 @@ public class BrokerClient : IBrokerClient
         CancellationToken? cancellationToken = null)
     {
         var serializedPayload =
-            _payloadFactory.NewPacket(FlowPacketType.FlowPacket, flowPath);
+            _payloadFactory.NewPacketFlowName(FlowPacketType.FlowDeclare, flowPath, name);
         return _sendDataProcessor.SendAsync(serializedPayload, true,
             cancellationToken ?? CancellationToken.None);
     }
@@ -115,7 +115,7 @@ public class BrokerClient : IBrokerClient
         CancellationToken? cancellationToken = null)
     {
         var serializedPayload =
-            _payloadFactory.NewPacket(FlowPacketType.FlowPacket, "", name);
+            _payloadFactory.NewPacketFlowName(FlowPacketType.FlowDelete, null, name);
         return _sendDataProcessor.SendAsync(serializedPayload, true,
             cancellationToken ?? CancellationToken.None);
     }
@@ -124,7 +124,7 @@ public class BrokerClient : IBrokerClient
         CancellationToken? cancellationToken = null)
     {
         var serializedPayload =
-            _payloadFactory.NewPacket(FlowPacketType.FlowPacket, "");
+            _payloadFactory.NewPacket(FlowPacketType.Configure, null);
         return _sendDataProcessor.SendAsync(serializedPayload, true,
             cancellationToken ?? CancellationToken.None);
     }

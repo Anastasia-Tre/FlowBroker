@@ -48,7 +48,7 @@ public class ReceiveDataProcessor : IReceiveDataProcessor
             case FlowPacketType.Error:
                 OnError(data);
                 break;
-            case FlowPacketType.FlowFlowPacket:
+            case FlowPacketType.FlowPacket:
                 OnPacket(data);
                 break;
             default:
@@ -61,7 +61,7 @@ public class ReceiveDataProcessor : IReceiveDataProcessor
     private void OnPacket(Memory<byte> payloadData)
     {
         Interlocked.Increment(ref _receivedPacketsCount);
-        var queuePacket = _deserializer.Deserialized(payloadData);
+        var queuePacket = _deserializer.Deserialized(FlowPacketType.FlowPacket, payloadData);
         if (_subscriptionStore.TryGet(queuePacket.FlowName,
                 out var subscription))
             ((Subscription)subscription).OnPacketReceived(queuePacket);
@@ -69,14 +69,14 @@ public class ReceiveDataProcessor : IReceiveDataProcessor
 
     private void OnOk(Memory<byte> payloadData)
     {
-        var ack = _deserializer.Deserialized(payloadData);
+        var ack = _deserializer.Deserialized(FlowPacketType.Ok, payloadData);
         _taskManager.OnPayloadOkResult(ack.Id);
         OnOkReceived?.Invoke(ack.Id);
     }
 
     private void OnError(Memory<byte> payloadData)
     {
-        var nack = _deserializer.Deserialized(payloadData);
+        var nack = _deserializer.Deserialized(FlowPacketType.Error, payloadData);
         _taskManager.OnPayloadErrorResult(nack.Id, nack);
         OnErrorReceived?.Invoke(nack.Id, nack);
     }

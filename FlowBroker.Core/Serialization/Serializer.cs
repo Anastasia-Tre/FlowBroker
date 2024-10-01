@@ -17,11 +17,29 @@ public class Serializer : ISerializer
 
         try
         {
-            return binaryWriter
+            var result = binaryWriter
                 .WriteType(packet.PacketType)
                 .WriteId(packet.Id)
-                .WriteStr(packet.FlowPath)
-                .WriteStr(packet.FlowName)
+                //.WriteStr(packet.FlowPath)
+                //.WriteStr(packet.FlowName ?? packet.FlowPath)
+                //.WriteMemory(packet.Data)
+                ;
+
+            if (packet.FlowPath != null)
+            {
+                result.WriteInt(1);
+                result.WriteStr(packet.FlowPath);
+            } else
+                result.WriteInt(0);
+
+            if (packet.FlowName != null || packet.FlowPath != null)
+            {
+                result.WriteInt(1);
+                result.WriteStr(packet.FlowName ?? packet.FlowPath);
+            } else
+                result.WriteInt(0);
+
+            return result
                 .WriteMemory(packet.Data)
                 .ToSerializedPayload();
         }

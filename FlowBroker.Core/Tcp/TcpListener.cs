@@ -23,9 +23,9 @@ public sealed class TcpListener : IListener
 
     private SocketAsyncEventArgs _socketAsyncEventArgs;
 
-    public TcpListener(IPEndPoint endPoint, ILogger<TcpListener> logger)
+    public TcpListener(ConnectionProvider connectionProvider, ILogger<TcpListener> logger)
     {
-        _endPoint = endPoint;
+        _endPoint = connectionProvider.IpEndPoint;
         _logger = logger;
     }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Text;
 using FlowBroker.Core.FlowPackets;
 
 namespace FlowBroker.Client.TaskManager;
@@ -55,7 +56,7 @@ internal class TaskManager : ITaskManager
     public void OnPayloadErrorResult(Guid payloadId, FlowPacket error)
     {
         if (_tasks.TryGetValue(payloadId, out var taskCompletionSource))
-            taskCompletionSource.OnError(error.Data.ToString());
+            taskCompletionSource.OnError(Encoding.UTF8.GetString(error.Data.ToArray()));
     }
 
     public void OnPayloadSendSuccess(Guid payloadId)

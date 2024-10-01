@@ -16,7 +16,7 @@ public enum FlowPacketType
     UnsubscribeFlow = 9,
     Ready = 10,
     Configure = 11,
-    FlowFlowPacket = 12
+    //FlowFlowPacket = 12
 }
 
 public class FlowPacket
