@@ -5,7 +5,8 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Net;
 
 namespace FlowBroker.Main;
-internal class Workflow
+
+public class Workflow
 {
     private readonly int _flowPacketCount;
 

@@ -83,14 +83,14 @@ public class Flow : IFlow
         }, TaskCreationOptions.LongRunning);
     }
 
-    public void OnFlowPacket(FlowPacket flowPacket)
+    public void OnFlowPacket(FlowPacket packet)
     {
         ThrowIfDisposed();
 
         _logger.LogInformation(
-            $"Flow {Name} received flowPacket with id: {flowPacket.Id}");
+            $"Flow {Name} received flowPacket with id: {packet.Id}");
 
-        flowPacket.FlowName = Name;
+        var flowPacket = packet.ToSendFlowPacket(Name);
 
         // persist the flowPacket
         _flowPacketRepo.Add(flowPacket.Id, flowPacket);

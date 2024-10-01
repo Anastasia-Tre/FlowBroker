@@ -10,13 +10,13 @@ public interface IPayloadFactory
     SerializedPayload NewPacket(FlowPacketType type, string path,
         byte[] data = null);
 
-    SerializedPayload NewPacket(FlowPacketType type, string path, string data);
+    //SerializedPayload NewPacket(FlowPacketType type, string path, string data);
 
     SerializedPayload NewPacketFlowName(FlowPacketType type, string path,
         string flowName, byte[] data = null);
 
-    SerializedPayload NewPacketFlowName(FlowPacketType type, string path,
-        string flowName, string data);
+    //SerializedPayload NewPacketFlowName(FlowPacketType type, string path,
+    //    string flowName, string data);
 }
 
 public class PayloadFactory : IPayloadFactory
@@ -42,11 +42,11 @@ public class PayloadFactory : IPayloadFactory
         return _serializer.Serialize(payload);
     }
 
-    public SerializedPayload NewPacket(FlowPacketType type, string path,
-        string data)
-    {
-        return NewPacket(type, path, Encoding.ASCII.GetBytes(data));
-    }
+    //public SerializedPayload NewPacket(FlowPacketType type, string path,
+    //    string data)
+    //{
+    //    return NewPacket(type, path, Encoding.ASCII.GetBytes(data));
+    //}
 
     public SerializedPayload NewPacketFlowName(FlowPacketType type, string path, string flowName,
         byte[] data = null)
@@ -63,9 +63,9 @@ public class PayloadFactory : IPayloadFactory
         return _serializer.Serialize(payload);
     }
 
-    public SerializedPayload NewPacketFlowName(FlowPacketType type, string path, string flowName,
-        string data)
-    {
-        return NewPacketFlowName(type, path, flowName, Encoding.ASCII.GetBytes(data));
-    }
+    //public SerializedPayload NewPacketFlowName(FlowPacketType type, string path, string flowName,
+    //    string data)
+    //{
+    //    return NewPacketFlowName(type, path, flowName, Encoding.ASCII.GetBytes(data));
+    //}
 }

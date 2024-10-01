@@ -29,6 +29,20 @@ public class FlowPacket
 
     public FlowPacketType PacketType { get; set; } = FlowPacketType.FlowPacket;
 
+    public FlowPacket ToSendFlowPacket(string name)
+    {
+        var newData = ArrayPool<byte>.Shared.Rent(Data.Length);
+        Data.CopyTo(newData);
+        return new FlowPacket
+        {
+            Id = Guid.NewGuid(),
+            Data = newData.AsMemory(0, Data.Length),
+            FlowPath = FlowPath,
+            FlowName = name,
+            OriginalFlowPacketData = newData
+        };
+    }
+
     public void Dispose()
     {
         ArrayPool<byte>.Shared.Return(OriginalFlowPacketData);

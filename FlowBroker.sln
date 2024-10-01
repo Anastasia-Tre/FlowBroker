@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35222.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowBroker.Core", "FlowBroker.Core\FlowBroker.Core.csproj", "{C633D5EE-91DC-4550-A728-AE4F02FCD659}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowBroker.Core", "FlowBroker.Core\FlowBroker.Core.csproj", "{C633D5EE-91DC-4550-A728-AE4F02FCD659}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowBroker.Client", "FlowBroker.Client\FlowBroker.Client.csproj", "{433DC9B0-A972-449B-B8A2-A8484715A083}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowBroker.Client", "FlowBroker.Client\FlowBroker.Client.csproj", "{433DC9B0-A972-449B-B8A2-A8484715A083}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowBroker.Main", "FlowBroker.Main\FlowBroker.Main.csproj", "{C4274210-F8E2-4D8E-ADD7-3F2AE87CB7CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowBroker.Main", "FlowBroker.Main\FlowBroker.Main.csproj", "{C4274210-F8E2-4D8E-ADD7-3F2AE87CB7CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowBroker.Test", "FlowBroker.Test\FlowBroker.Test.csproj", "{E2914E20-A32D-44DE-8763-31BAEE61B966}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{C4274210-F8E2-4D8E-ADD7-3F2AE87CB7CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4274210-F8E2-4D8E-ADD7-3F2AE87CB7CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4274210-F8E2-4D8E-ADD7-3F2AE87CB7CC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2914E20-A32D-44DE-8763-31BAEE61B966}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2914E20-A32D-44DE-8763-31BAEE61B966}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2914E20-A32D-44DE-8763-31BAEE61B966}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2914E20-A32D-44DE-8763-31BAEE61B966}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
