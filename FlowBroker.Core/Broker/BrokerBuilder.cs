@@ -37,7 +37,7 @@ public class BrokerBuilder
         _serviceCollection.AddSingleton<IDeserializer, Deserializer>();
 
         _serviceCollection.AddSingleton<IPayloadProcessor, PayloadProcessor>();
-        _serviceCollection.AddSingleton<IPathMatcher, PathMatcher>();
+        _serviceCollection.AddSingleton<IPathMatcher, DefaultPathMatcher>();
         _serviceCollection.AddTransient<IDispatcher, Dispatcher>();
     }
 
@@ -63,7 +63,12 @@ public class BrokerBuilder
     public BrokerBuilder AddConsoleLog()
     {
         ConfigureLogger(builder => { builder.AddConsole(); });
+        return this;
+    }
 
+    public BrokerBuilder UsePathMatcher<T>() where T : class, IPathMatcher
+    {
+        _serviceCollection.AddSingleton<IPathMatcher, T>();
         return this;
     }
 }

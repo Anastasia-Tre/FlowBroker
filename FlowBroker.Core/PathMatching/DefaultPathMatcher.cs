@@ -2,19 +2,21 @@
 
 public interface IPathMatcher
 {
+    const string WildCard = "*";
+    const string PathSeparator = "/";
+
     bool Match(string flowPacketPath, string flowPath);
 }
 
-internal class PathMatcher : IPathMatcher
+public class DefaultPathMatcher : IPathMatcher
 {
     public bool Match(string flowPacketPath, string flowPath)
     {
-        if (flowPacketPath is null || flowPath is null) return false;
+        if (string.IsNullOrEmpty(flowPacketPath) || string.IsNullOrEmpty(flowPath))
+            return false;
 
-        const string wildCard = "*";
-
-        var flowPacketPathSegments = flowPacketPath.Split('/');
-        var queuePathSegments = flowPath.Split('/');
+        var flowPacketPathSegments = flowPacketPath.Split(IPathMatcher.PathSeparator);
+        var queuePathSegments = flowPath.Split(IPathMatcher.PathSeparator);
 
         var minSegmentCount = Math.Min(flowPacketPathSegments.Length,
             queuePathSegments.Length);
@@ -24,7 +26,7 @@ internal class PathMatcher : IPathMatcher
             var flowPacketSegment = flowPacketPathSegments[i];
             var queueSegment = queuePathSegments[i];
 
-            if (flowPacketSegment == wildCard || queueSegment == wildCard)
+            if (flowPacketSegment == IPathMatcher.WildCard || queueSegment == IPathMatcher.WildCard)
                 continue;
 
             if (flowPacketSegment == queueSegment)

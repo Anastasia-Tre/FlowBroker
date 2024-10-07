@@ -1,5 +1,6 @@
 ﻿using FlowBroker.Client.BrokerClient;
 using FlowBroker.Core.Broker;
+using FlowBroker.Core.PathMatching;
 using FlowBroker.Main.Utils;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Net;
@@ -28,6 +29,7 @@ public class Workflow
         using var broker = new BrokerBuilder()
             .AddConsoleLog()
             .UseEndPoint(serverEndPoint)
+            .UsePathMatcher<CachedRegexPathMatcher>()
             .Build();
 
         broker.Start();
