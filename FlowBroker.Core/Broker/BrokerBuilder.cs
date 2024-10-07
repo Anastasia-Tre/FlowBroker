@@ -1,12 +1,12 @@
-﻿using FlowBroker.Core.Clients;
+﻿using System.Net;
+using FlowBroker.Core.Clients;
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Flows;
-using FlowBroker.Core.Payload;
 using FlowBroker.Core.PathMatching;
+using FlowBroker.Core.Payload;
 using FlowBroker.Core.Serialization;
 using FlowBroker.Core.Tcp;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net;
 using Microsoft.Extensions.Logging;
 
 namespace FlowBroker.Core.Broker;
@@ -49,7 +49,8 @@ public class BrokerBuilder
 
     public BrokerBuilder UseEndPoint(IPEndPoint endPoint)
     {
-        var connectionProvider = new ConnectionProvider { IpEndPoint = endPoint };
+        var connectionProvider = new ConnectionProvider
+            { IpEndPoint = endPoint };
         _serviceCollection.AddSingleton(connectionProvider);
         return this;
     }

@@ -1,12 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 using FlowBroker.Core.FlowPackets;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlowBroker.Main.Utils;
 
@@ -86,7 +79,8 @@ internal class FlowPacketHelper
             {
                 foreach (var (key, _) in _allFlowPackets)
                     if (!_receivedFlowPackets.ContainsKey(key))
-                        Console.WriteLine($"FlowPacket {key} was not received by the subscription");
+                        Console.WriteLine(
+                            $"FlowPacket {key} was not received by the subscription");
 
                 throw new Exception(
                     $"Number of received flowPackets is {ReceivedCount} but should be {_numberOfFlowPackets}");
@@ -94,6 +88,7 @@ internal class FlowPacketHelper
 
             lastTimeCheck = ReceivedCount;
         }
+
         Console.WriteLine("All packets are received...");
     }
 
@@ -112,7 +107,8 @@ internal class FlowPacketHelper
             {
                 foreach (var (key, _) in _allFlowPackets)
                     if (!_sentFlowPackets.ContainsKey(key))
-                        Console.WriteLine($"FlowPacket {key} was not received by the subscription");
+                        Console.WriteLine(
+                            $"FlowPacket {key} was not received by the subscription");
 
                 throw new Exception(
                     $"Number of received flowPackets is {SentCount} but should be {_numberOfFlowPackets}");
@@ -120,6 +116,7 @@ internal class FlowPacketHelper
 
             lastTimeCheck = SentCount;
         }
+
         Console.WriteLine("All packets are sent...");
     }
 }

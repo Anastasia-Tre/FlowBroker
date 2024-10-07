@@ -18,8 +18,8 @@ public class Serializer : ISerializer
         try
         {
             var result = binaryWriter
-                .WriteType(packet.PacketType)
-                .WriteId(packet.Id)
+                    .WriteType(packet.PacketType)
+                    .WriteId(packet.Id)
                 //.WriteStr(packet.FlowPath)
                 //.WriteStr(packet.FlowName ?? packet.FlowPath)
                 //.WriteMemory(packet.Data)
@@ -29,15 +29,21 @@ public class Serializer : ISerializer
             {
                 result.WriteInt(1);
                 result.WriteStr(packet.FlowPath);
-            } else
+            }
+            else
+            {
                 result.WriteInt(0);
+            }
 
             if (packet.FlowName != null || packet.FlowPath != null)
             {
                 result.WriteInt(1);
                 result.WriteStr(packet.FlowName ?? packet.FlowPath);
-            } else
+            }
+            else
+            {
                 result.WriteInt(0);
+            }
 
             return result
                 .WriteMemory(packet.Data)

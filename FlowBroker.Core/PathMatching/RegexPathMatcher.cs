@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace FlowBroker.Core.PathMatching;
 
@@ -11,7 +6,8 @@ public class RegexPathMatcher : IPathMatcher
 {
     public bool Match(string flowPacketPath, string flowPath)
     {
-        if (string.IsNullOrEmpty(flowPacketPath) || string.IsNullOrEmpty(flowPath))
+        if (string.IsNullOrEmpty(flowPacketPath) ||
+            string.IsNullOrEmpty(flowPath))
             return false;
 
         var result = MatchPaths(flowPacketPath, flowPath);
@@ -20,7 +16,8 @@ public class RegexPathMatcher : IPathMatcher
 
     private bool MatchPaths(string flowPacketPath, string flowPath)
     {
-        var flowPacketPathSegments = flowPacketPath.Split(IPathMatcher.PathSeparator);
+        var flowPacketPathSegments =
+            flowPacketPath.Split(IPathMatcher.PathSeparator);
         var flowPathSegments = flowPath.Split(IPathMatcher.PathSeparator);
 
         var minSegmentCount = Math.Min(flowPacketPathSegments.Length,
@@ -31,7 +28,8 @@ public class RegexPathMatcher : IPathMatcher
             var flowPacketSegment = flowPacketPathSegments[i];
             var flowSegment = flowPathSegments[i];
 
-            if (flowSegment == IPathMatcher.WildCard || flowPacketSegment == IPathMatcher.WildCard)
+            if (flowSegment == IPathMatcher.WildCard ||
+                flowPacketSegment == IPathMatcher.WildCard)
                 continue;
 
             if (IsRegex(flowSegment))
@@ -39,17 +37,17 @@ public class RegexPathMatcher : IPathMatcher
                 var regexPattern = ExtractRegex(flowSegment);
                 if (!Regex.IsMatch(flowPacketSegment, regexPattern))
                     return false;
-            } else if (IsRegex(flowPacketSegment))
+            }
+            else if (IsRegex(flowPacketSegment))
             {
                 var regexPattern = ExtractRegex(flowPacketSegment);
                 if (!Regex.IsMatch(flowSegment, regexPattern))
                     return false;
-            } else
+            }
+            else
             {
-                if (!flowPacketSegment.Equals(flowSegment, StringComparison.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
+                if (!flowPacketSegment.Equals(flowSegment,
+                        StringComparison.OrdinalIgnoreCase)) return false;
             }
         }
 

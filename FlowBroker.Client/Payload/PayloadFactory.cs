@@ -1,5 +1,4 @@
-﻿using System.Text;
-using FlowBroker.Core.FlowPackets;
+﻿using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Serialization;
 
@@ -48,7 +47,8 @@ public class PayloadFactory : IPayloadFactory
     //    return NewPacket(type, path, Encoding.ASCII.GetBytes(data));
     //}
 
-    public SerializedPayload NewPacketFlowName(FlowPacketType type, string path, string flowName,
+    public SerializedPayload NewPacketFlowName(FlowPacketType type, string path,
+        string flowName,
         byte[] data = null)
     {
         var payload = new FlowPacket

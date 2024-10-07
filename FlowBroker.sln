@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowBroker.Client", "FlowBr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowBroker.Main", "FlowBroker.Main\FlowBroker.Main.csproj", "{C4274210-F8E2-4D8E-ADD7-3F2AE87CB7CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlowBroker.Test", "FlowBroker.Test\FlowBroker.Test.csproj", "{E2914E20-A32D-44DE-8763-31BAEE61B966}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FlowBroker.Test", "FlowBroker.Test\FlowBroker.Test.csproj", "{E2914E20-A32D-44DE-8763-31BAEE61B966}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

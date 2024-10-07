@@ -1,9 +1,8 @@
-﻿using FlowBroker.Client.BrokerClient;
+﻿using System.Net;
+using FlowBroker.Client.BrokerClient;
 using FlowBroker.Core.Broker;
 using FlowBroker.Core.PathMatching;
 using FlowBroker.Main.Utils;
-using Microsoft.Extensions.Logging.Abstractions;
-using System.Net;
 
 namespace FlowBroker.Main;
 
@@ -19,7 +18,7 @@ public class Workflow
     public async Task StartProcess()
     {
         var topicName = RandomGenerator.GenerateString(10);
-        var flowPacketStore = new  FlowPacketHelper();
+        var flowPacketStore = new FlowPacketHelper();
         var serverEndPoint = new IPEndPoint(IPAddress.Loopback, 8100);
 
         // setup flowPacket store
@@ -45,7 +44,8 @@ public class Workflow
         subscriberClient.Connect(serverEndPoint);
 
         // declare topic
-        var declareResult = await publisherClient.DeclareFlowAsync(topicName, topicName);
+        var declareResult =
+            await publisherClient.DeclareFlowAsync(topicName, topicName);
         if (!declareResult.IsSuccess)
         {
             Console.WriteLine(declareResult.InternalErrorCode);
@@ -53,9 +53,11 @@ public class Workflow
         }
 
         // create subscription
-        var subscription = await subscriberClient.GetFlowSubscriptionAsync(topicName);
+        var subscription =
+            await subscriberClient.GetFlowSubscriptionAsync(topicName);
 
-        subscription.PacketReceived += msg => {
+        subscription.PacketReceived += msg =>
+        {
             var flowPacketIdentifier = new Guid(msg.Data.Span);
 
             flowPacketStore.OnFlowPacketReceived(flowPacketIdentifier);
@@ -68,11 +70,13 @@ public class Workflow
         {
             var msg = flowPacketStore.NewFlowPacket();
 
-            var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+            var cancellationTokenSource =
+                new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
-            var publishResult = await publisherClient.PublishAsync(topicName, msg.Data.ToArray(), cancellationTokenSource.Token);
+            var publishResult = await publisherClient.PublishAsync(topicName,
+                msg.Data.ToArray(), cancellationTokenSource.Token);
 
-            if (publishResult.IsSuccess) 
+            if (publishResult.IsSuccess)
                 flowPacketStore.OnFlowPacketSent(msg.Id);
             else
                 Console.WriteLine(publishResult.InternalErrorCode);

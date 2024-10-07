@@ -12,10 +12,12 @@ public class DefaultPathMatcher : IPathMatcher
 {
     public bool Match(string flowPacketPath, string flowPath)
     {
-        if (string.IsNullOrEmpty(flowPacketPath) || string.IsNullOrEmpty(flowPath))
+        if (string.IsNullOrEmpty(flowPacketPath) ||
+            string.IsNullOrEmpty(flowPath))
             return false;
 
-        var flowPacketPathSegments = flowPacketPath.Split(IPathMatcher.PathSeparator);
+        var flowPacketPathSegments =
+            flowPacketPath.Split(IPathMatcher.PathSeparator);
         var queuePathSegments = flowPath.Split(IPathMatcher.PathSeparator);
 
         var minSegmentCount = Math.Min(flowPacketPathSegments.Length,
@@ -26,7 +28,8 @@ public class DefaultPathMatcher : IPathMatcher
             var flowPacketSegment = flowPacketPathSegments[i];
             var queueSegment = queuePathSegments[i];
 
-            if (flowPacketSegment == IPathMatcher.WildCard || queueSegment == IPathMatcher.WildCard)
+            if (flowPacketSegment == IPathMatcher.WildCard ||
+                queueSegment == IPathMatcher.WildCard)
                 continue;
 
             if (flowPacketSegment == queueSegment)

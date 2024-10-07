@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Serialization;
@@ -26,7 +22,7 @@ internal static class RandomGenerator
 
     public static FlowPacket GetFlowPacket(string path)
     {
-        return new()
+        return new FlowPacket
         {
             Data = Encoding.UTF8.GetBytes(GenerateString(10)),
             Id = Guid.NewGuid(),
@@ -34,7 +30,8 @@ internal static class RandomGenerator
         };
     }
 
-    public static SerializedPayload GetFlowPacketSerializedPayload(string path = default)
+    public static SerializedPayload GetFlowPacketSerializedPayload(
+        string path = default)
     {
         var serializer = new Serializer();
         return serializer.Serialize(GetFlowPacket(path));

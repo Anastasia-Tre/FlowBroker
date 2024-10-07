@@ -56,7 +56,8 @@ internal class TaskManager : ITaskManager
     public void OnPayloadErrorResult(Guid payloadId, FlowPacket error)
     {
         if (_tasks.TryGetValue(payloadId, out var taskCompletionSource))
-            taskCompletionSource.OnError(Encoding.UTF8.GetString(error.Data.ToArray()));
+            taskCompletionSource.OnError(
+                Encoding.UTF8.GetString(error.Data.ToArray()));
     }
 
     public void OnPayloadSendSuccess(Guid payloadId)

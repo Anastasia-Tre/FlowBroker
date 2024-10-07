@@ -34,7 +34,9 @@ public class Deserializer : IDeserializer
             var path = isPath == 1 ? binaryReader.ReadNextString() : null;
 
             var isQueueName = binaryReader.ReadNextInt();
-            var queueName = isQueueName == 1 ? binaryReader.ReadNextString() : null;
+            var queueName = isQueueName == 1
+                ? binaryReader.ReadNextString()
+                : null;
 
             var dataSize = binaryReader.ReadNextBytes();
 

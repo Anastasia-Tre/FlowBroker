@@ -99,7 +99,8 @@ internal class Subscription : ISubscription
         ThrowIfDisposed();
 
         var serializedPayload =
-            _payloadFactory.NewPacketFlowName(FlowPacketType.SubscribeFlow, null, Name);
+            _payloadFactory.NewPacketFlowName(FlowPacketType.SubscribeFlow,
+                null, Name);
 
         var result = await _sendDataProcessor.SendAsync(serializedPayload, true,
             cancellationToken);
@@ -112,7 +113,8 @@ internal class Subscription : ISubscription
     private async Task UnSubscribeAsync(CancellationToken cancellationToken)
     {
         var serializedPayload =
-            _payloadFactory.NewPacketFlowName(FlowPacketType.UnsubscribeFlow, null, Name);
+            _payloadFactory.NewPacketFlowName(FlowPacketType.UnsubscribeFlow,
+                null, Name);
 
         try
         {
