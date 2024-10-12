@@ -1,6 +1,5 @@
 ﻿using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
-using FlowBroker.Core.Utils.BinarySerialization;
 using FlowBroker.Core.Utils.Pooling;
 
 namespace FlowBroker.Core.Serialization;
@@ -40,8 +39,9 @@ public class Deserializer : IDeserializer
                 : null;
 
             var isDataType = binaryReader.ReadNextInt();
-            var dataType = isDataType == 1 
-                ? Type.GetType(binaryReader.ReadNextString()) : null;
+            var dataType = isDataType == 1
+                ? Type.GetType(binaryReader.ReadNextString())
+                : null;
 
             var dataSize = binaryReader.ReadNextBytes();
 

@@ -1,6 +1,4 @@
-﻿using FlowBroker.Core.FlowPackets;
-
-namespace FlowBroker.Client.Subscriptions;
+﻿namespace FlowBroker.Client.Subscriptions;
 
 public class SubscriptionPacket
 {

@@ -4,7 +4,6 @@ using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Flows;
 using FlowBroker.Core.Serialization;
 using Microsoft.Extensions.Logging;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlowBroker.Core.Payload;
 

@@ -1,6 +1,5 @@
 ﻿using System.Buffers;
 using FlowBroker.Core.Utils.Persistence;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlowBroker.Core.FlowPackets;
 
@@ -60,6 +59,8 @@ public class FlowPacketRepository : DataRepository<Guid, FlowPacket>,
 }
 
 /// <summary>
-/// all fields must have properties { get; set; }
+///     all fields must have properties { get; set; }
 /// </summary>
-public interface IPacket { }
+public interface IPacket
+{
+}

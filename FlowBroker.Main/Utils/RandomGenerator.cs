@@ -2,7 +2,6 @@
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlowBroker.Main.Utils;
 

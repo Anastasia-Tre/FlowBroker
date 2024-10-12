@@ -8,7 +8,7 @@ namespace FlowBroker.Client.Payload;
 public interface ISerializedPayloadFactory
 {
     //SerializedPayload NewPacket(FlowPacketType type, string path,
-        //byte[] data = null);
+    //byte[] data = null);
 
     SerializedPayload NewPacket(string path, IPacket packet);
 
@@ -43,21 +43,6 @@ public class SerializedPayloadFactory : ISerializedPayloadFactory
     }
 
     public SerializedPayload NewPacket(FlowPacketType type, string path,
-        byte[] data = null)
-    {
-        var payload = new FlowPacket
-        {
-            Id = Guid.NewGuid(),
-            PacketType = type,
-            //DataType = data?.GetType(),
-            Data = data,
-            FlowPath = path
-        };
-
-        return _serializer.Serialize(payload);
-    }
-
-    public SerializedPayload NewPacket(FlowPacketType type, string path,
         Guid data)
     {
         var payload = new FlowPacket
@@ -84,6 +69,21 @@ public class SerializedPayloadFactory : ISerializedPayloadFactory
             Data = data,
             FlowPath = path,
             FlowName = flowName
+        };
+
+        return _serializer.Serialize(payload);
+    }
+
+    public SerializedPayload NewPacket(FlowPacketType type, string path,
+        byte[] data = null)
+    {
+        var payload = new FlowPacket
+        {
+            Id = Guid.NewGuid(),
+            PacketType = type,
+            //DataType = data?.GetType(),
+            Data = data,
+            FlowPath = path
         };
 
         return _serializer.Serialize(payload);

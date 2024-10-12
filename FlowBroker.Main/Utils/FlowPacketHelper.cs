@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using FlowBroker.Client.Payload;
 using FlowBroker.Core.FlowPackets;
-using FlowBroker.Core.Serialization;
 
 namespace FlowBroker.Main.Utils;
 
@@ -34,7 +33,7 @@ internal class FlowPacketHelper
     public (FlowPacket, WorkflowPacket) NewFlowPacket(string path = null)
     {
         var id = Guid.NewGuid();
-        var workflowPacket = new WorkflowPacket()
+        var workflowPacket = new WorkflowPacket
         {
             Data = id
         };

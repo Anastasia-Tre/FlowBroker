@@ -18,9 +18,14 @@ public interface ISubscription : IAsyncDisposable
 internal class Subscription : ISubscription
 {
     private readonly IConnectionManager _connectionManager;
-    private readonly ISerializedPayloadFactory _serializedPayloadFactory;
     private readonly ISendDataProcessor _sendDataProcessor;
+    private readonly ISerializedPayloadFactory _serializedPayloadFactory;
     private bool _disposed;
+
+    //public event Action<SubscriptionPacket> PacketReceived;
+
+    private readonly Dictionary<Type, Action<SubscriptionPacket>>
+        PacketHandlers = new();
 
     public Subscription(ISerializedPayloadFactory serializedPayloadFactory,
         IConnectionManager connectionManager,
@@ -35,20 +40,9 @@ internal class Subscription : ISubscription
 
     public string Name { get; private set; }
 
-    //public event Action<SubscriptionPacket> PacketReceived;
-
-    private Dictionary<Type, Action<SubscriptionPacket>> PacketHandlers = new ();
-
     public bool AddPacketHandler(Type type, Action<SubscriptionPacket> action)
     {
         return PacketHandlers.TryAdd(type, action);
-    }
-
-    private Action<SubscriptionPacket> GetPacketHandler(Type type)
-    {
-        if (PacketHandlers.TryGetValue(type, out var action))
-            return action;
-        return _ => { };
     }
 
     public async ValueTask DisposeAsync()
@@ -66,13 +60,6 @@ internal class Subscription : ISubscription
         await UnSubscribeAsync(cancellationTokenSource.Token);
     }
 
-    public async Task SetupAsync(string name,
-        CancellationToken cancellationToken)
-    {
-        Name = name;
-        await SubscribeAsync(cancellationToken);
-    }
-
     public void OnPacketReceived(FlowPacket flowPacket)
     {
         try
@@ -83,7 +70,8 @@ internal class Subscription : ISubscription
             {
                 PacketId = flowPacket.Id,
                 DataType = flowPacket.DataType,
-                Data = JsonHelper.ByteArrayToObject(flowPacket.Data.ToArray(), flowPacket.DataType),
+                Data = JsonHelper.ByteArrayToObject(flowPacket.Data.ToArray(),
+                    flowPacket.DataType),
                 FlowFlowPath = flowPacket.FlowPath,
                 FlowName = flowPacket.FlowName
             };
@@ -93,7 +81,6 @@ internal class Subscription : ISubscription
 
             //PacketReceived?.Invoke(subscriptionPacket);
             GetPacketHandler(flowPacket.DataType).Invoke(subscriptionPacket);
-
         }
         // if packet process failed then mark it as nacked
         catch
@@ -103,6 +90,20 @@ internal class Subscription : ISubscription
             OnPacketProcessedByClient(flowPacket.Id, false,
                 cancellationTokenSource.Token);
         }
+    }
+
+    private Action<SubscriptionPacket> GetPacketHandler(Type type)
+    {
+        if (PacketHandlers.TryGetValue(type, out var action))
+            return action;
+        return _ => { };
+    }
+
+    public async Task SetupAsync(string name,
+        CancellationToken cancellationToken)
+    {
+        Name = name;
+        await SubscribeAsync(cancellationToken);
     }
 
     private async void OnPacketProcessedByClient(Guid packetId, bool ack,
@@ -119,7 +120,8 @@ internal class Subscription : ISubscription
         ThrowIfDisposed();
 
         var serializedPayload =
-            _serializedPayloadFactory.NewPacketFlowName(FlowPacketType.SubscribeFlow,
+            _serializedPayloadFactory.NewPacketFlowName(
+                FlowPacketType.SubscribeFlow,
                 null, Name);
 
         var result = await _sendDataProcessor.SendAsync(serializedPayload, true,
@@ -133,7 +135,8 @@ internal class Subscription : ISubscription
     private async Task UnSubscribeAsync(CancellationToken cancellationToken)
     {
         var serializedPayload =
-            _serializedPayloadFactory.NewPacketFlowName(FlowPacketType.UnsubscribeFlow,
+            _serializedPayloadFactory.NewPacketFlowName(
+                FlowPacketType.UnsubscribeFlow,
                 null, Name);
 
         try
@@ -150,7 +153,8 @@ internal class Subscription : ISubscription
     private async Task AckAsync(Guid packetId,
         CancellationToken cancellationToken)
     {
-        var serializedPayload = _serializedPayloadFactory.NewPacket(FlowPacketType.Ack,
+        var serializedPayload = _serializedPayloadFactory.NewPacket(
+            FlowPacketType.Ack,
             null, packetId);
         await _sendDataProcessor.SendAsync(serializedPayload, false,
             cancellationToken);
@@ -159,7 +163,8 @@ internal class Subscription : ISubscription
     private async Task NackAsync(Guid packetId,
         CancellationToken cancellationToken)
     {
-        var serializedPayload = _serializedPayloadFactory.NewPacket(FlowPacketType.Nack,
+        var serializedPayload = _serializedPayloadFactory.NewPacket(
+            FlowPacketType.Nack,
             null, packetId);
         await _sendDataProcessor.SendAsync(serializedPayload, false,
             cancellationToken);
@@ -190,16 +195,15 @@ public interface
 public class SubscriptionRepository : DataRepository<string, ISubscription>,
     ISubscriptionRepository
 {
-    public bool TryGet<T>(string flowName, out ISubscription subscription) where T : class, IPacket
+    public bool TryGet<T>(string flowName, out ISubscription subscription)
+        where T : class, IPacket
     {
         if (TryGet(flowName, out var subscriptionBase))
-        {
             if (subscriptionBase is Subscription typedSubscription)
             {
                 subscription = typedSubscription;
                 return true;
             }
-        }
 
         subscription = null;
         return false;
