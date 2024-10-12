@@ -57,15 +57,15 @@ public class ReceiveDataProcessor : IReceiveDataProcessor
         }
     }
 
-
     private void OnPacket(Memory<byte> payloadData)
     {
         Interlocked.Increment(ref _receivedPacketsCount);
         var queuePacket =
             _deserializer.Deserialized(FlowPacketType.FlowPacket, payloadData);
+
         if (_subscriptionStore.TryGet(queuePacket.FlowName,
                 out var subscription))
-            ((Subscription)subscription).OnPacketReceived(queuePacket);
+            subscription.OnPacketReceived(queuePacket);
     }
 
     private void OnOk(Memory<byte> payloadData)

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using FlowBroker.Client.Payload;
 using FlowBroker.Core.FlowPackets;
+using FlowBroker.Core.Serialization;
 
 namespace FlowBroker.Main.Utils;
 
@@ -29,21 +31,20 @@ internal class FlowPacketHelper
         _numberOfFlowPackets = numberOfFlowPackets;
     }
 
-    public FlowPacket NewFlowPacket(string path = null)
+    public (FlowPacket, WorkflowPacket) NewFlowPacket(string path = null)
     {
         var id = Guid.NewGuid();
-
-        var msg = new FlowPacket
+        var workflowPacket = new WorkflowPacket()
         {
-            Id = id,
-            Data = id.ToByteArray(),
-            //Data = Encoding.ASCII.GetBytes($"Test Message {SentCount}"),
-            FlowPath = path ?? _defaultFlowPath
+            Data = id
         };
 
-        _allFlowPackets[id] = msg;
+        var flowPacket = FlowPacketFactory.NewPacket(path, workflowPacket);
+        flowPacket.Id = id;
 
-        return msg;
+        _allFlowPackets[id] = flowPacket;
+
+        return (flowPacket, workflowPacket);
     }
 
     public void OnFlowPacketSent(Guid id)
@@ -119,4 +120,9 @@ internal class FlowPacketHelper
 
         Console.WriteLine("All packets are sent...");
     }
+}
+
+internal class WorkflowPacket : IPacket
+{
+    public Guid Data { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
+using FlowBroker.Core.Utils.BinarySerialization;
 using FlowBroker.Core.Utils.Pooling;
 
 namespace FlowBroker.Core.Serialization;
@@ -41,6 +42,15 @@ public class Serializer : ISerializer
                 result.WriteStr(packet.FlowName ?? packet.FlowPath);
             }
             else
+            {
+                result.WriteInt(0);
+            }
+
+            if (packet.DataType != null)
+            {
+                result.WriteInt(1);
+                result.WriteStr(packet.DataType.AssemblyQualifiedName);
+            } else
             {
                 result.WriteInt(0);
             }

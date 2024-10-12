@@ -2,6 +2,7 @@
 using FlowBroker.Core.FlowPackets;
 using FlowBroker.Core.Payload;
 using FlowBroker.Core.Serialization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlowBroker.Main.Utils;
 
@@ -24,6 +25,7 @@ internal static class RandomGenerator
     {
         return new FlowPacket
         {
+            DataType = typeof(string),
             Data = Encoding.UTF8.GetBytes(GenerateString(10)),
             Id = Guid.NewGuid(),
             FlowPath = path ?? GenerateString(10)

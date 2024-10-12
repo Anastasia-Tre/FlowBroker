@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using FlowBroker.Core.Utils.Persistence;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FlowBroker.Core.FlowPackets;
 
@@ -15,9 +16,7 @@ public enum FlowPacketType
     SubscribeFlow = 8,
     UnsubscribeFlow = 9,
     Ready = 10,
-
     Configure = 11
-    //FlowFlowPacket = 12
 }
 
 public class FlowPacket
@@ -25,6 +24,8 @@ public class FlowPacket
     public Guid Id { get; set; }
     public string FlowName { get; set; }
     public string FlowPath { get; set; }
+
+    public Type DataType { get; set; }
     public Memory<byte> Data { get; set; }
     public byte[] OriginalFlowPacketData { get; set; }
 
@@ -37,6 +38,7 @@ public class FlowPacket
         return new FlowPacket
         {
             Id = Guid.NewGuid(),
+            DataType = DataType,
             Data = newData.AsMemory(0, Data.Length),
             FlowPath = FlowPath,
             FlowName = name,
@@ -56,3 +58,8 @@ public class FlowPacketRepository : DataRepository<Guid, FlowPacket>,
     IFlowPacketRepository
 {
 }
+
+/// <summary>
+/// all fields must have properties { get; set; }
+/// </summary>
+public interface IPacket { }

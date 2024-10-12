@@ -1,4 +1,6 @@
-﻿namespace FlowBroker.Client.Subscriptions;
+﻿using FlowBroker.Core.FlowPackets;
+
+namespace FlowBroker.Client.Subscriptions;
 
 public class SubscriptionPacket
 {
@@ -7,7 +9,8 @@ public class SubscriptionPacket
     public string FlowFlowPath { get; set; }
     public string FlowName { get; set; }
 
-    public Memory<byte> Data { get; set; }
+    public Type DataType { get; set; }
+    public object Data { get; set; }
 
     internal event Action<Guid, bool, CancellationToken>
         OnPacketProcessedByClient;

@@ -38,7 +38,7 @@ public class BrokerClientFactory
         serviceCollection.AddSingleton<ISerializer, Serializer>();
         serviceCollection.AddSingleton<IDeserializer, Deserializer>();
         serviceCollection.AddSingleton<ITaskManager, TaskManager.TaskManager>();
-        serviceCollection.AddSingleton<IPayloadFactory, PayloadFactory>();
+        serviceCollection.AddSingleton<ISerializedPayloadFactory, SerializedPayloadFactory>();
         serviceCollection.AddSingleton<StringPool>();
         serviceCollection.AddSingleton<IConnectionManager, ConnectionManager>();
         serviceCollection.AddSingleton<ISendDataProcessor, SendDataProcessor>();

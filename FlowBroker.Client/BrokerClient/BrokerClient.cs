@@ -22,7 +22,10 @@ public interface IBrokerClient : IAsyncDisposable
     Task<ISubscription> GetFlowSubscriptionAsync(string name,
         CancellationToken? cancellationToken = null);
 
-    Task<SendAsyncResult> PublishAsync(string flowPath, byte[] data,
+    //Task<SendAsyncResult> PublishAsync(string flowPath, byte[] data,
+    //    CancellationToken? cancellationToken = null);
+
+    Task<SendAsyncResult> PublishAsync(string flowPath, IPacket data,
         CancellationToken? cancellationToken = null);
 
     Task<SendAsyncResult> DeclareFlowAsync(string name, string flowPath,
@@ -31,13 +34,13 @@ public interface IBrokerClient : IAsyncDisposable
     Task<SendAsyncResult> DeleteFlowAsync(string name,
         CancellationToken? cancellationToken = null);
 
-    Task<SendAsyncResult> ConfigureClientAsync(int prefetchCount,
-        CancellationToken? cancellationToken = null);
+    //Task<SendAsyncResult> ConfigureClientAsync(int prefetchCount,
+    //    CancellationToken? cancellationToken = null);
 }
 
 public class BrokerClient : IBrokerClient
 {
-    private readonly IPayloadFactory _payloadFactory;
+    private readonly ISerializedPayloadFactory _serializedPayloadFactory;
     private readonly ISendDataProcessor _sendDataProcessor;
     private readonly ISerializer _serializer;
     private readonly ISubscriptionRepository _subscriptionStore;
@@ -45,13 +48,13 @@ public class BrokerClient : IBrokerClient
 
     private bool _isDisposed;
 
-    public BrokerClient(IPayloadFactory payloadFactory,
+    public BrokerClient(ISerializedPayloadFactory serializedPayloadFactory,
         IConnectionManager connectionManager,
         ISendDataProcessor sendDataProcessor,
         ISubscriptionRepository subscriptionStore, ISerializer serializer,
         ITaskManager taskManager)
     {
-        _payloadFactory = payloadFactory;
+        _serializedPayloadFactory = serializedPayloadFactory;
         ConnectionManager = connectionManager;
         _subscriptionStore = subscriptionStore;
         _sendDataProcessor = sendDataProcessor;
@@ -81,7 +84,7 @@ public class BrokerClient : IBrokerClient
     public async Task<ISubscription> GetFlowSubscriptionAsync(string name,
         CancellationToken? cancellationToken = null)
     {
-        var subscription = new Subscription(_payloadFactory, ConnectionManager,
+        var subscription = new Subscription(_serializedPayloadFactory, ConnectionManager,
             _sendDataProcessor);
 
         _subscriptionStore.Add(name, subscription);
@@ -92,12 +95,21 @@ public class BrokerClient : IBrokerClient
         return subscription;
     }
 
-    public Task<SendAsyncResult> PublishAsync(string flowPath, byte[] data,
+    //public Task<SendAsyncResult> PublishAsync(string flowPath, byte[] data,
+    //    CancellationToken? cancellationToken = null)
+    //{
+    //    var serializedPayload =
+    //        _serializedPayloadFactory.NewPacket(FlowPacketType.FlowPacket, flowPath,
+    //            data);
+    //    return _sendDataProcessor.SendAsync(serializedPayload, true,
+    //        cancellationToken ?? CancellationToken.None);
+    //}
+
+    public Task<SendAsyncResult> PublishAsync(string flowPath, IPacket data,
         CancellationToken? cancellationToken = null)
     {
         var serializedPayload =
-            _payloadFactory.NewPacket(FlowPacketType.FlowPacket, flowPath,
-                data);
+            _serializedPayloadFactory.NewPacket(flowPath, data);
         return _sendDataProcessor.SendAsync(serializedPayload, true,
             cancellationToken ?? CancellationToken.None);
     }
@@ -106,7 +118,7 @@ public class BrokerClient : IBrokerClient
         CancellationToken? cancellationToken = null)
     {
         var serializedPayload =
-            _payloadFactory.NewPacketFlowName(FlowPacketType.FlowDeclare,
+            _serializedPayloadFactory.NewPacketFlowName(FlowPacketType.FlowDeclare,
                 flowPath, name);
         return _sendDataProcessor.SendAsync(serializedPayload, true,
             cancellationToken ?? CancellationToken.None);
@@ -116,20 +128,20 @@ public class BrokerClient : IBrokerClient
         CancellationToken? cancellationToken = null)
     {
         var serializedPayload =
-            _payloadFactory.NewPacketFlowName(FlowPacketType.FlowDelete, null,
+            _serializedPayloadFactory.NewPacketFlowName(FlowPacketType.FlowDelete, null,
                 name);
         return _sendDataProcessor.SendAsync(serializedPayload, true,
             cancellationToken ?? CancellationToken.None);
     }
 
-    public Task<SendAsyncResult> ConfigureClientAsync(int prefetchCount,
-        CancellationToken? cancellationToken = null)
-    {
-        var serializedPayload =
-            _payloadFactory.NewPacket(FlowPacketType.Configure, null);
-        return _sendDataProcessor.SendAsync(serializedPayload, true,
-            cancellationToken ?? CancellationToken.None);
-    }
+    //public Task<SendAsyncResult> ConfigureClientAsync(int prefetchCount,
+    //    CancellationToken? cancellationToken = null)
+    //{
+    //    var serializedPayload =
+    //        _serializedPayloadFactory.NewPacket(FlowPacketType.Configure, null);
+    //    return _sendDataProcessor.SendAsync(serializedPayload, true,
+    //        cancellationToken ?? CancellationToken.None);
+    //}
 
     public async ValueTask DisposeAsync()
     {

@@ -56,28 +56,29 @@ public class Workflow
         var subscription =
             await subscriberClient.GetFlowSubscriptionAsync(topicName);
 
-        subscription.PacketReceived += msg =>
+        subscription.AddPacketHandler(typeof(WorkflowPacket), msg =>
         {
-            var flowPacketIdentifier = new Guid(msg.Data.Span);
+            var data = ((WorkflowPacket)msg.Data).Data;
+            var flowPacketIdentifier = data;
 
             flowPacketStore.OnFlowPacketReceived(flowPacketIdentifier);
 
             msg.Ack();
-        };
+        });
 
         // send flowPackets to server
         while (flowPacketStore.SentCount < _flowPacketCount)
         {
-            var msg = flowPacketStore.NewFlowPacket();
+            var (flowPacket, workflowPacket) = flowPacketStore.NewFlowPacket();
 
             var cancellationTokenSource =
                 new CancellationTokenSource(TimeSpan.FromSeconds(1));
 
             var publishResult = await publisherClient.PublishAsync(topicName,
-                msg.Data.ToArray(), cancellationTokenSource.Token);
+                workflowPacket, cancellationTokenSource.Token);
 
             if (publishResult.IsSuccess)
-                flowPacketStore.OnFlowPacketSent(msg.Id);
+                flowPacketStore.OnFlowPacketSent(flowPacket.Id);
             else
                 Console.WriteLine(publishResult.InternalErrorCode);
         }
