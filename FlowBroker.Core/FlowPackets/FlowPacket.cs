@@ -1,5 +1,4 @@
 ﻿using System.Buffers;
-using FlowBroker.Core.Utils.Persistence;
 
 namespace FlowBroker.Core.FlowPackets;
 
@@ -18,11 +17,24 @@ public enum FlowPacketType
     Configure = 11
 }
 
+public enum FlowPacketPriority
+{
+    Critical = 0,
+    High = 1,
+    AboveNormal = 2,
+    Normal = 3,
+    BelowNormal = 4,
+    Low = 5
+}
+
 public class FlowPacket
 {
     public Guid Id { get; set; }
     public string FlowName { get; set; }
     public string FlowPath { get; set; }
+
+    public FlowPacketPriority Priority { get; set; } =
+        FlowPacketPriority.Normal;
 
     public Type DataType { get; set; }
     public Memory<byte> Data { get; set; }
@@ -49,13 +61,6 @@ public class FlowPacket
     {
         ArrayPool<byte>.Shared.Return(OriginalFlowPacketData);
     }
-}
-
-public interface IFlowPacketRepository : IDataRepository<Guid, FlowPacket>;
-
-public class FlowPacketRepository : DataRepository<Guid, FlowPacket>,
-    IFlowPacketRepository
-{
 }
 
 /// <summary>

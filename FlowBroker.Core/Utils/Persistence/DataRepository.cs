@@ -1,4 +1,6 @@
-﻿namespace FlowBroker.Core.Utils.Persistence;
+﻿using System.Collections.Concurrent;
+
+namespace FlowBroker.Core.Utils.Persistence;
 
 public interface IDataRepository<in TKey, TValue> where TKey : notnull
 {
@@ -13,7 +15,7 @@ public abstract class
     DataRepository<TKey, TValue> : IDataRepository<TKey, TValue>
     where TKey : notnull
 {
-    protected readonly Dictionary<TKey, TValue> Data = new();
+    protected readonly ConcurrentDictionary<TKey, TValue> Data = new();
 
     public virtual void Setup()
     {
@@ -28,7 +30,7 @@ public abstract class
 
     public virtual bool Remove(TKey key)
     {
-        return Data.Remove(key);
+        return Data.Remove(key, out _);
     }
 
     public virtual bool TryGet(TKey key, out TValue value)
