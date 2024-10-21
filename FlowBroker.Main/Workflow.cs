@@ -6,7 +6,8 @@ using FlowBroker.Main.Utils;
 
 namespace FlowBroker.Main;
 
-public class Workflow
+public class Workflow<TPathMather>
+    where TPathMather : class, IPathMatcher
 {
     private readonly int _flowPacketCount;
 
@@ -28,7 +29,7 @@ public class Workflow
         using var broker = new BrokerBuilder()
             .AddConsoleLog()
             .UseEndPoint(serverEndPoint)
-            .UsePathMatcher<CachedRegexPathMatcher>()
+            .UsePathMatcher<TPathMather>()
             .Build();
 
         broker.Start();
