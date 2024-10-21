@@ -5,7 +5,7 @@ using FlowBroker.Core.Serialization;
 
 namespace FlowBroker.Main.Utils;
 
-internal static class RandomGenerator
+public static class RandomGenerator
 {
     public static string GenerateString(int length, Random random = null)
     {

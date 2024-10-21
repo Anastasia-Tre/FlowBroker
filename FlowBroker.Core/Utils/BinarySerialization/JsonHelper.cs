@@ -22,8 +22,8 @@ public class JsonHelper
 
     public static object ByteArrayToObject(byte[] arrBytes, Type type)
     {
-        var bytesAsString = Encoding.UTF8.GetString(arrBytes);
-        //return JsonSerializer.Deserialize(arrBytes, type);
-        return JsonSerializer.Deserialize(bytesAsString, type);
+        //var bytesAsString = Encoding.UTF8.GetString(arrBytes);
+        return JsonSerializer.Deserialize(arrBytes, type);
+        //return JsonSerializer.Deserialize(bytesAsString, type);
     }
 }
